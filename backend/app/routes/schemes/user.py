@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 class UserBase(BaseModel):
     email: str
@@ -12,3 +13,4 @@ class UserOut(UserBase):
 
     class Config:
         from_attributes = True
+        
