@@ -1,4 +1,4 @@
-from .db import Base
+from ...core.db import Base
 from .user import User
 from .cv import Cv
 from .interview import Interview
