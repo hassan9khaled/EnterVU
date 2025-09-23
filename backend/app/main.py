@@ -1,35 +1,33 @@
-from fastapi import FastAPI, Depends
-from sqlalchemy.orm import Session
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from app.routes import base, users, cvs
+from backend.app.core import db
+import logging
 
-from app import db
-from app.models import user as user_model
-from app.schemas import UserCreate, UserOut
-
-db.Base.metadata.create_all(bind=db.engine)
+logger = logging.getLogger('uvicorn.error')
 
 
-# Initialize FastAPI app
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+
+
+    db.Base.metadata.create_all(bind=db.engine)
+    app.state.db_client = db.get_db()
+
+    logger.info("Connected to database")
+
+    yield
+
+    
+
 app = FastAPI(
     title="AI Interview System",
     description="MVP for AI-powered interview preparation and evaluation",
-    version="0.1.0"
+    version="0.1",
+    lifespan=lifespan
 )
 
-# Health check endpoint
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
-
-# Root endpoint
-@app.get("/")
-def root():
-    return {"message": "Welcome to the AI Interview System API"}
-
-# User endpoint
-@app.post("/users", response_model=UserOut)
-def create_user(user: UserCreate, database: Session = Depends(db.get_db)):
-    db_user = user_model.User(email=user.email, name=user.name)
-    database.add(db_user)
-    database.commit()
-    database.refresh(db_user)
-    return db_user
+app.include_router(base.base_router)
+app.include_router(users.users_router)
+app.include_router(cvs.cvs_router)
