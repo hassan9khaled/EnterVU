@@ -1,0 +1,733 @@
+{
+	"info": {
+		"_postman_id": "9f80d517-a2eb-4f86-a4ae-1fdfba32facb",
+		"name": "AI Interview System API",
+		"description": "This collection contains all the API endpoints for the AI Interview System MVP. It allows for managing users, CVs, and interviews.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "46544919",
+		"_collection_link": "https://hassan-7850080.postman.co/workspace/Hassan's-Workspace~f84ef771-f10c-4f33-8430-824fcea2aafc/collection/46544919-9f80d517-a2eb-4f86-a4ae-1fdfba32facb?action=share&source=collection_link&creator=46544919"
+	},
+	"item": [
+		{
+			"name": "General",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"health"
+							]
+						},
+						"description": "Checks the operational status of the API.\n\n**Returns:**\n- `200 OK` with `{\"status\": \"ok\"}` if the service is running."
+					},
+					"response": []
+				},
+				{
+					"name": "Root",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1"
+							]
+						},
+						"description": "Returns a welcome message from the API.\n\n**Returns:**\n- `200 OK` with a welcome message."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"hassan112@gmail.com\",\n    \"name\": \"Hassan Gaber\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								""
+							]
+						},
+						"description": "Registers a new user in the system.\n\n**Request Body:**\n- `email` (string, required): The unique email address for the user.\n- `name` (string, optional): The name of the user.\n\n**Returns:**\n- `200 OK`: The created user object, including their database-generated `id`."
+					},
+					"response": [
+						{
+							"name": "Create User",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"hassan112@gmail.com\",\n    \"name\": \"Hassan Gaber\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/users/",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										""
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "date",
+									"value": "Thu, 25 Sep 2025 12:38:29 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "60"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"email\": \"hassan112@gmail.com\",\n    \"name\": \"Hassan Gaber\",\n    \"id\": 3\n}"
+						}
+					]
+				},
+				{
+					"name": "Get User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get User",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/users/{{user_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"{{user_id}}"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "date",
+									"value": "Thu, 25 Sep 2025 12:38:39 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "60"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"email\": \"hassan112@gmail.com\",\n    \"name\": \"Hassan Gaber\",\n    \"id\": 3\n}"
+						}
+					]
+				},
+				{
+					"name": "List Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "List Users",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/users/",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										""
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "date",
+									"value": "Thu, 25 Sep 2025 12:37:45 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "122"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"email\": \"hassan@gmail.com\",\n        \"name\": \"Hassan Khaled\",\n        \"id\": 1\n    },\n    {\n        \"email\": \"hassan12@gmail.com\",\n        \"name\": \"Hassan Mahmoud\",\n        \"id\": 2\n    }\n]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "CVs",
+			"item": [
+				{
+					"name": "Create CV",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "user_id",
+									"value": "{{user_id}}",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/home/hassan/Downloads/Hassan Khaled - CV.pdf"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/cvs/upload",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cvs",
+								"upload"
+							]
+						},
+						"description": "Uploads a new CV for an existing user.\n\n**Prerequisites:** You must have a valid `user_id` from a previously created user.\n\n**Request Body:**\n- `user_id` (integer, required): The ID of the user who owns this CV.\n- `raw_text` (string, required): The full text content of the CV.\n\n**Returns:**\n- `200 OK`: The created CV object.\n- `400 Bad Request`: If the `user_id` does not exist."
+					},
+					"response": [
+						{
+							"name": "Create CV",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "user_id",
+											"value": "{{user_id}}",
+											"type": "text"
+										},
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/home/hassan/Downloads/Hassan Khaled - CV.pdf"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/cvs/upload",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"cvs",
+										"upload"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "date",
+									"value": "Thu, 25 Sep 2025 12:39:13 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "2292"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 3,\n    \"user_id\": 3,\n    \"raw_text\": \" \\nHassan Khaled Khamis \\nhassan9khaled@gmail.com| +201273604829 | Al-Amiriya, Cairo, Egypt \\nLinkedIn: hassan9khaled | GitHub: hassan9khaled \\n \\nPROFILE \\n \\nA Data Science student at the Helwan University with Strong academic achievement Possess strong \\nleadership and communication skills and problem-solving skills with fluency in Arabic and good \\nspoken English Keen to pursue a career in Data Science. \\n \\nEDUCATION \\n \\nHelwan University | Cairo, Egypt                                                                       Oct 2021 – June 2025 \\nBachelor in Statistics and Computer Science \\n. \\n \\nWork Experience  \\n \\n● Data Entry at Majorel (1 month) – Katameya \\n● Data Entry at MEEG (6 months) – Nasr City \\n \\nProjects \\n \\nEmail Classifier: \\nDeveloped a machine learning model to automatically categorize emails into predefined \\nlabels using Bayes Theorem \\nSentiment Analysis (NLTK, scikit-learn): \\nBuilt a natural language processing tool to determine the emotional tone (positive, \\nnegative, neutral) of text data. \\nGold Price Prediction: \\nCreated a predictive model to forecast future gold prices based on historical data and \\nrelevant features using Time Series Techniques. \\nRAG System: \\nDeveloped a Retrieval-Augmented Generation (RAG) system for ingesting, chunking, and \\nembedding PDF documents using LangChain and Chroma, with features for efficient content \\nmanagement and database persistence \\nDiet recommendation system(K-means): \\nDesigned a system that provides personalized diet recommendations based on user \\npreferences and health goals using clustering. \\nAI-Agent: \\nDeveloped an intelligent agent capable of performing autonomous tasks and interacting \\nwith its environment \\n \\n \\n \\n \\nCourses \\n \\n- \\nMastering Python (Elzero Web School) via YouTube \\n- \\nMachine Learning Course (Andrew NG) via Coursera  \\nSkills \\n \\nLanguages: Arabic (native), English (B1) \\nMicrosoft Office: Proficient in Word, Excel and PowerPoint \\nSkill: Data Entry, Python development, Touch typing, Content Writing, Problem Solving, Web \\nscraping \\n \\n\",\n    \"file_path\": \"/media/hassan/Programming/Python/ai-interview-system/backend/app/assets/cvs/3/zgin71tjci6w_HassanKhaledCV.pdf\",\n    \"uploaded_at\": \"2025-09-25T12:39:13\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Interviews",
+			"item": [
+				{
+					"name": "Create Interview",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{user_id}},\n    \"cv_id\": {{cv_id}},\n    \"job_title\": \"Junoir Python Developer\",\n    \"job_description\": \"test\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/interviews/start",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"interviews",
+								"start"
+							]
+						},
+						"description": "Creates a new interview session for a user based on one of their CVs.\n\n**Prerequisites:** You must have a valid `user_id` and a `cv_id` that belongs to that user.\n\n**Request Body:**\n- `user_id` (integer, required): The ID of the user.\n- `cv_id` (integer, required): The ID of the CV to be used for the interview.\n- `job_title` (string, required): The target job title for this interview.\n\n**Returns:**\n- `200 OK`: The created interview object, including a `score` and `decision`.\n- `400 Bad Request`: If the `user_id` or `cv_id` is not found or mismatched."
+					},
+					"response": [
+						{
+							"name": "Create Interview",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"user_id\": {{user_id}},\n    \"cv_id\": {{cv_id}},\n    \"job_title\": \"Junoir Python Developer\",\n    \"job_description\": \"test\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/interviews/start",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"interviews",
+										"start"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "date",
+									"value": "Thu, 25 Sep 2025 12:39:48 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "3027"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 3,\n    \"user\": {\n        \"email\": \"hassan112@gmail.com\",\n        \"name\": \"Hassan Gaber\",\n        \"id\": 3\n    },\n    \"cvs\": {\n        \"id\": 3,\n        \"user_id\": 3,\n        \"raw_text\": \" \\nHassan Khaled Khamis \\nhassan9khaled@gmail.com| +201273604829 | Al-Amiriya, Cairo, Egypt \\nLinkedIn: hassan9khaled | GitHub: hassan9khaled \\n \\nPROFILE \\n \\nA Data Science student at the Helwan University with Strong academic achievement Possess strong \\nleadership and communication skills and problem-solving skills with fluency in Arabic and good \\nspoken English Keen to pursue a career in Data Science. \\n \\nEDUCATION \\n \\nHelwan University | Cairo, Egypt                                                                       Oct 2021 – June 2025 \\nBachelor in Statistics and Computer Science \\n. \\n \\nWork Experience  \\n \\n● Data Entry at Majorel (1 month) – Katameya \\n● Data Entry at MEEG (6 months) – Nasr City \\n \\nProjects \\n \\nEmail Classifier: \\nDeveloped a machine learning model to automatically categorize emails into predefined \\nlabels using Bayes Theorem \\nSentiment Analysis (NLTK, scikit-learn): \\nBuilt a natural language processing tool to determine the emotional tone (positive, \\nnegative, neutral) of text data. \\nGold Price Prediction: \\nCreated a predictive model to forecast future gold prices based on historical data and \\nrelevant features using Time Series Techniques. \\nRAG System: \\nDeveloped a Retrieval-Augmented Generation (RAG) system for ingesting, chunking, and \\nembedding PDF documents using LangChain and Chroma, with features for efficient content \\nmanagement and database persistence \\nDiet recommendation system(K-means): \\nDesigned a system that provides personalized diet recommendations based on user \\npreferences and health goals using clustering. \\nAI-Agent: \\nDeveloped an intelligent agent capable of performing autonomous tasks and interacting \\nwith its environment \\n \\n \\n \\n \\nCourses \\n \\n- \\nMastering Python (Elzero Web School) via YouTube \\n- \\nMachine Learning Course (Andrew NG) via Coursera  \\nSkills \\n \\nLanguages: Arabic (native), English (B1) \\nMicrosoft Office: Proficient in Word, Excel and PowerPoint \\nSkill: Data Entry, Python development, Touch typing, Content Writing, Problem Solving, Web \\nscraping \\n \\n\",\n        \"file_path\": \"/media/hassan/Programming/Python/ai-interview-system/backend/app/assets/cvs/3/zgin71tjci6w_HassanKhaledCV.pdf\",\n        \"uploaded_at\": \"2025-09-25T12:39:13\"\n    },\n    \"job_title\": \"Junoir Python Developer\",\n    \"questions\": [\n        {\n            \"id\": 11,\n            \"text\": \"Based on your experience with Python, can you describe a time you optimized a slow algorithm?\",\n            \"order\": 1\n        },\n        {\n            \"id\": 12,\n            \"text\": \"How would you approach designing a scalable system for a real-time application?\",\n            \"order\": 2\n        },\n        {\n            \"id\": 13,\n            \"text\": \"Tell me about a time you had a disagreement with a team member. How did you resolve it?\",\n            \"order\": 3\n        },\n        {\n            \"id\": 14,\n            \"text\": \"What interests you about the Junoir Python Developer role at our company?\",\n            \"order\": 4\n        },\n        {\n            \"id\": 15,\n            \"text\": \"Where do you see yourself in five years?\",\n            \"order\": 5\n        }\n    ],\n    \"score\": null,\n    \"decision\": null,\n    \"report\": null,\n    \"created_at\": \"2025-09-25T12:39:48\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Next Question",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/interviews/{{interview_id}}/next-question",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"interviews",
+								"{{interview_id}}",
+								"next-question"
+							]
+						},
+						"description": "Creates a new interview session for a user based on one of their CVs.\n\n**Prerequisites:** You must have a valid `user_id` and a `cv_id` that belongs to that user.\n\n**Request Body:**\n- `user_id` (integer, required): The ID of the user.\n- `cv_id` (integer, required): The ID of the CV to be used for the interview.\n- `job_title` (string, required): The target job title for this interview.\n\n**Returns:**\n- `200 OK`: The created interview object, including a `score` and `decision`.\n- `400 Bad Request`: If the `user_id` or `cv_id` is not found or mismatched."
+					},
+					"response": [
+						{
+							"name": "Get Next Question",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/interviews/{{interview_id}}/next-question",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"interviews",
+										"{{interview_id}}",
+										"next-question"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "date",
+									"value": "Thu, 25 Sep 2025 12:40:06 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "122"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 11,\n    \"text\": \"Based on your experience with Python, can you describe a time you optimized a slow algorithm?\",\n    \"order\": 1\n}"
+						}
+					]
+				},
+				{
+					"name": "Answer Question",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question_id\": 11,\n    \"user_answer\": \"text 2aaa\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/interviews/{{interview_id}}/answer",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"interviews",
+								"{{interview_id}}",
+								"answer"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Answer Question",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"question_id\": 12,\n    \"user_answer\": \"text 2aaa\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/interviews/{{interview_id}}/answer",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"interviews",
+										"{{interview_id}}",
+										"answer"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "date",
+									"value": "Thu, 25 Sep 2025 12:41:36 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "73"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 11,\n    \"user_answer\": \"text 2aaa\",\n    \"score\": 8.1,\n    \"feedback\": \"Great Answer\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Finish Interview",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/interviews/{{interview_id}}/finish",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"interviews",
+								"{{interview_id}}",
+								"finish"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Finish Interview",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/interviews/{{interview_id}}/finish",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"interviews",
+										"{{interview_id}}",
+										"finish"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "date",
+									"value": "Thu, 25 Sep 2025 12:42:53 GMT"
+								},
+								{
+									"key": "server",
+									"value": "uvicorn"
+								},
+								{
+									"key": "content-length",
+									"value": "3067"
+								},
+								{
+									"key": "content-type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 3,\n    \"user\": {\n        \"email\": \"hassan112@gmail.com\",\n        \"name\": \"Hassan Gaber\",\n        \"id\": 3\n    },\n    \"cvs\": {\n        \"id\": 3,\n        \"user_id\": 3,\n        \"raw_text\": \" \\nHassan Khaled Khamis \\nhassan9khaled@gmail.com| +201273604829 | Al-Amiriya, Cairo, Egypt \\nLinkedIn: hassan9khaled | GitHub: hassan9khaled \\n \\nPROFILE \\n \\nA Data Science student at the Helwan University with Strong academic achievement Possess strong \\nleadership and communication skills and problem-solving skills with fluency in Arabic and good \\nspoken English Keen to pursue a career in Data Science. \\n \\nEDUCATION \\n \\nHelwan University | Cairo, Egypt                                                                       Oct 2021 – June 2025 \\nBachelor in Statistics and Computer Science \\n. \\n \\nWork Experience  \\n \\n● Data Entry at Majorel (1 month) – Katameya \\n● Data Entry at MEEG (6 months) – Nasr City \\n \\nProjects \\n \\nEmail Classifier: \\nDeveloped a machine learning model to automatically categorize emails into predefined \\nlabels using Bayes Theorem \\nSentiment Analysis (NLTK, scikit-learn): \\nBuilt a natural language processing tool to determine the emotional tone (positive, \\nnegative, neutral) of text data. \\nGold Price Prediction: \\nCreated a predictive model to forecast future gold prices based on historical data and \\nrelevant features using Time Series Techniques. \\nRAG System: \\nDeveloped a Retrieval-Augmented Generation (RAG) system for ingesting, chunking, and \\nembedding PDF documents using LangChain and Chroma, with features for efficient content \\nmanagement and database persistence \\nDiet recommendation system(K-means): \\nDesigned a system that provides personalized diet recommendations based on user \\npreferences and health goals using clustering. \\nAI-Agent: \\nDeveloped an intelligent agent capable of performing autonomous tasks and interacting \\nwith its environment \\n \\n \\n \\n \\nCourses \\n \\n- \\nMastering Python (Elzero Web School) via YouTube \\n- \\nMachine Learning Course (Andrew NG) via Coursera  \\nSkills \\n \\nLanguages: Arabic (native), English (B1) \\nMicrosoft Office: Proficient in Word, Excel and PowerPoint \\nSkill: Data Entry, Python development, Touch typing, Content Writing, Problem Solving, Web \\nscraping \\n \\n\",\n        \"file_path\": \"/media/hassan/Programming/Python/ai-interview-system/backend/app/assets/cvs/3/zgin71tjci6w_HassanKhaledCV.pdf\",\n        \"uploaded_at\": \"2025-09-25T12:39:13\"\n    },\n    \"job_title\": \"Junoir Python Developer\",\n    \"questions\": [\n        {\n            \"id\": 11,\n            \"text\": \"Based on your experience with Python, can you describe a time you optimized a slow algorithm?\",\n            \"order\": 1\n        },\n        {\n            \"id\": 12,\n            \"text\": \"How would you approach designing a scalable system for a real-time application?\",\n            \"order\": 2\n        },\n        {\n            \"id\": 13,\n            \"text\": \"Tell me about a time you had a disagreement with a team member. How did you resolve it?\",\n            \"order\": 3\n        },\n        {\n            \"id\": 14,\n            \"text\": \"What interests you about the Junoir Python Developer role at our company?\",\n            \"order\": 4\n        },\n        {\n            \"id\": 15,\n            \"text\": \"Where do you see yourself in five years?\",\n            \"order\": 5\n        }\n    ],\n    \"score\": 8.1,\n    \"decision\": \"accepted\",\n    \"report\": {\n        \"id\": 2,\n        \"content\": \"here is the report\"\n    },\n    \"created_at\": \"2025-09-25T12:39:48\"\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000",
+			"description": "The base URL of the locally running FastAPI application."
+		},
+		{
+			"key": "user_id",
+			"value": "1"
+		},
+		{
+			"key": "cv_id",
+			"value": "1"
+		},
+		{
+			"key": "interview_id",
+			"value": ""
+		}
+	]
+}

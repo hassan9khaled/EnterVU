@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.routes import base, users, cvs
-from backend.app.core import db
+from app.routes import base, users, cvs, interviews
+from app.core import db
 import logging
 
 logger = logging.getLogger('uvicorn.error')
@@ -31,3 +31,4 @@ app = FastAPI(
 app.include_router(base.base_router)
 app.include_router(users.users_router)
 app.include_router(cvs.cvs_router)
+app.include_router(interviews.interviews_router)
