@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from app.controllers import DataController
 from app.services import cv_service
 from app.models import ResponseSignal
-from backend.app.core import db
-from app.schemes.cv import CvOut
+from app.core import db
+from app.schemes.cv_schemes import CvOut
 
 import shutil
 import logging

@@ -24,3 +24,9 @@ def create_cv(db: Session, user_id: int, file_path: str, raw_text) -> Cv:
   db.refresh(db_cv)
 
   return db_cv
+
+def get_cv_by_id_and_user(db: Session, cv_id: int, user_id: int) -> Cv | None:
+    return db.query(Cv).filter(
+        Cv.id == cv_id,
+        Cv.user_id == user_id
+    ).first()

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, DateTime, func, ForeignKey, Text, String
 from sqlalchemy.orm import relationship
 
-from backend.app.core.db import Base
+from app.core.db import Base
 
 class Cv(Base):
     

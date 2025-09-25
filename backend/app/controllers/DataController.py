@@ -23,7 +23,15 @@ class DataController(BaseController):
 
         return True, ResponseSignal.FILE_VALIDATED_SUCCESS.value
 
-    def generate_unique_filepath(self, orig_file_name: str, user_id: str):
+    def generate_unique_filepath(self, orig_file_name: str, user_id: str, interview_id: int = None):
+        
+        if interview_id:
+            user_path = UserController().get_user_path(user_id=user_id, report=True)
+            new_file_path = os.path.join(
+                user_path,
+                f"interview_{str(interview_id)}_report.txt"
+            )
+            return new_file_path, None
 
         random_key = self.generate_random_string()
         user_path = UserController().get_user_path(user_id=user_id)

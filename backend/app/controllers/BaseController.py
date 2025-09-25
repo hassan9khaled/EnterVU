@@ -14,7 +14,10 @@ class BaseController:
             self.base_dir,
             "assets/cvs"
         )
-
+        self.reports_dir = os.path.join(
+            self.base_dir,
+            "assets/reports"
+        )
         
     def generate_random_string(self, length: int=12):
         return ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
