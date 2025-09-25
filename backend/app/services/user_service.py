@@ -1,12 +1,12 @@
 from app.models.db_schemes import User
-from typing import List
 
+from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
 
 from app.models.db_schemes.user import User
-from app.schemes.user import UserCreate
+from app.schemes.user_schemes import UserCreate
 
 def create_user(db: Session, user_data: UserCreate) -> User:
     """

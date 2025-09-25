@@ -3,10 +3,10 @@ from fastapi import HTTPException, status
 
 from sqlalchemy.orm import Session
 
-from app.schemes.user import UserCreate, UserOut
+from app.schemes.user_schemes import UserCreate, UserOut
 
 from app.services import user_service
-from backend.app.core import db
+from app.core import db
 
 import logging
 from typing import List
@@ -43,7 +43,7 @@ async def read_users(skip = 0, limit = 100, database: Session = Depends(db.get_d
 
 @users_router.get("/{user_id}", response_model=UserOut)
 async def read_user(user_id: int, database: Session = Depends(db.get_db)):
-    db_user = user_service.get_user(db = database,id=user_id)
+    db_user = user_service.get_user(db = database,user_id=user_id)
 
     # If the service function returns None, the user was not found
     if db_user is None:
