@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, Text, Float, String
 from sqlalchemy.orm import relationship
 
-from backend.app.core.db import Base
+from app.core.db import Base
 
 class Question(Base):
     
@@ -17,4 +17,4 @@ class Question(Base):
 
 
     interview = relationship("Interview", back_populates='questions')
-    answers = relationship("Answer", back_populates="questions")
+    answer = relationship("Answer", back_populates="question", uselist=False, cascade="all, delete-orphan")
