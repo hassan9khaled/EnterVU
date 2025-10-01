@@ -1,11 +1,11 @@
 import os
-import uuid
 from fastapi import Depends, HTTPException, status, UploadFile
 from sqlalchemy.orm import Session
 
 from app.controllers.FileController import FileController
 
-from app.integrations.cv_parser import parse_cv
+from app.integrations.google_adk.agents import cv_parsing_agent
+from app.integrations.google_adk.client import run_agent
 
 from app.models.db_schemes.cv import Cv
 from app.services import user_service
@@ -40,16 +40,16 @@ class CVService:
             file_path = await self.file_controller.save_cv_file(file=file, user_id=user_id)
 
             # Step 3: Extract text from the saved file
-            raw_text = self.file_controller.extract_text(file_path=file_path)
+            raw_text = await self.file_controller.extract_text(file_path=file_path)
 
             # Step 4: Parse the raw text using the external async service
             user_session_id = f"user_{user_id}"
-            session_id = str(uuid.uuid4())
-            parsed_text = await parse_cv(
-                raw_text=raw_text,
-                user_id=user_session_id,
-                session_id=session_id
-            )
+            
+            parsed_text = await run_agent(
+                agent=cv_parsing_agent,
+                query=raw_text,
+                user_id=user_session_id
+        )
 
             # Step 5: Create the final record in the database
             return self._create_cv_record(
