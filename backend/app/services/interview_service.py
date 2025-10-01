@@ -1,11 +1,9 @@
-# app/services/interview_service.py
-
 import os
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
 from app.controllers.FileController import FileController
-from app.integrations import adk
+from app.integrations.google_adk import mock_client
 from app.models import InterviewDecision, InterviewStatus
 from app.models.db_schemes import Interview, Question
 from app.schemes.answers_schemes import AnswerCreate
@@ -40,10 +38,11 @@ class InterviewService:
         if not cv:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="CV not found for this user")
 
-        question_texts = adk.generate_questions_from_llm(
+        question_texts = await mock_client.generate_questions(
             cv_text=cv.raw_text,
             job_title=interview_data.job_title,
-            job_description=interview_data.job_description
+            job_description=interview_data.job_description,
+            user_id=user.id
         )
         
         db_interview = self._create_interview_record_with_questions(interview_data, question_texts)
@@ -84,7 +83,7 @@ class InterviewService:
         if db_question.answer is not None:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This question has already been answered.")
 
-        evaluation = await adk.evaluate_answer(question=db_question.text, answer=answer_data.user_answer)
+        evaluation = await mock_client.evaluate_answer(question=db_question.text, answer=answer_data.user_answer)
         
         db_answer = answer_service.create_answer(
             db=self.db,
@@ -112,7 +111,7 @@ class InterviewService:
         
         final_score, decision = self._calculate_final_score_and_decision(db_answers)
 
-        report_content = await adk.generate_final_report(
+        report_content = await mock_client.generate_final_report(
             questions=db_interview.questions, answers=db_answers, feedbacks="feedbacks for each answer"
         )
         
