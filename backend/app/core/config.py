@@ -9,6 +9,7 @@ class Settings(BaseSettings):
 
     FILE_MAX_SIZE: int
     FILE_ALLOWED_TYPES: list
+    MAX_PAGES: int
 
     class Config:
         env_file = "./app/.env"

@@ -10,4 +10,6 @@ pytest==8.4.2
 httpx==0.28.1
 langchain==0.3.27
 langchain-community==0.3.29
-PyMuPDF==1.26.4
+google-adk==1.15.1
+aiofiles==24.1.0
+PyPDF2==3.0.1
