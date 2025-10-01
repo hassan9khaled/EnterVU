@@ -4,7 +4,7 @@ from app.core.config import get_settings, Settings
 
 # Create an API router for the base endpoints
 base_router = APIRouter(
-    tags = ["api_v1"],
+    tags = ["api_v2"],
 )
 
 # Health check endpoint

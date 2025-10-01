@@ -4,7 +4,7 @@ from app.services.cv_service import CVService
 
 cvs_router = APIRouter(
     prefix="/cvs",
-    tags=["api_v1", "CVs"]
+    tags=["api_v2", "CVs"]
 )
 
 @cvs_router.post("/upload", response_model=CvOut, status_code=status.HTTP_201_CREATED)

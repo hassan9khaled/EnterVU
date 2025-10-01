@@ -12,7 +12,7 @@ from app.services.interview_service import InterviewService
 
 interviews_router = APIRouter(
     prefix="/interviews",
-    tags=["api_v1", "Interviews"]
+    tags=["api_v2", "Interviews"]
 )
 
 
@@ -38,7 +38,7 @@ async def get_next_question(
     return interview_service.get_next_question(interview_id=interview_id)
 
 
-@interviews_router.post("/{interview_id}/answers", response_model=AnswerOut)
+@interviews_router.post("/{interview_id}/answer", response_model=AnswerOut)
 async def submit_answer(
     interview_id: int,
     answer_data: AnswerCreate,
