@@ -1,5 +1,4 @@
-from fastapi import APIRouter, FastAPI, Depends
-import os
+from fastapi import APIRouter, Depends
 from app.core.config import get_settings, Settings
 
 # Create an API router for the base endpoints
@@ -7,6 +6,7 @@ base_router = APIRouter(
     prefix = "/api/v1",
     tags = ["api_v1"],
 )
+
 # Health check endpoint
 @base_router.get("/health")
 def health_check():
