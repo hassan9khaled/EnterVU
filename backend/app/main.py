@@ -1,6 +1,18 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.routes import base, users, cvs, interviews
+# Routers from V1
+
+from app.routes.v1 import base as base_v1
+from app.routes.v1 import users as users_v1
+from app.routes.v1 import cvs as cvs_v1
+from app.routes.v1 import interviews as interviews_v1
+
+# Routers from V2
+from app.routes.v2 import base as base_v2
+from app.routes.v2 import users as users_v2
+from app.routes.v2 import cvs as cvs_v2
+from app.routes.v2 import interviews as interviews_v2
+
 from app.core import db
 import logging
 
@@ -28,7 +40,14 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-app.include_router(base.base_router)
-app.include_router(users.users_router)
-app.include_router(cvs.cvs_router)
-app.include_router(interviews.interviews_router)
+# --- Include V1 Routers ---
+app.include_router(base_v1.base_router, prefix="/api/v1")
+app.include_router(users_v1.users_router, prefix="/api/v1")
+app.include_router(cvs_v1.cvs_router, prefix="/api/v1")
+app.include_router(interviews_v1.interviews_router, prefix="/api/v1")
+
+# --- Include V2 Routers ---
+app.include_router(base_v2.base_router, prefix="/api/v2")
+app.include_router(users_v2.users_router, prefix="/api/v2")
+app.include_router(cvs_v2.cvs_router, prefix="/api/v2")
+app.include_router(interviews_v2.interviews_router, prefix="/api/v2")
