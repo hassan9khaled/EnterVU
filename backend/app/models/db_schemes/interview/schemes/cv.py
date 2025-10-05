@@ -16,5 +16,5 @@ class Cv(Base):
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     user = relationship("User", back_populates="cvs")
-    interviews = relationship("Interview", back_populates="cvs")
+    interviews = relationship("Interview", back_populates="cvs", cascade="save-update")
 

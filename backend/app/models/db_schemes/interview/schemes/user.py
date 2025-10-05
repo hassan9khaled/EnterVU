@@ -11,5 +11,5 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     name = Column(String, nullable=True)
 
-    cvs = relationship("app.models.db_schemes.cv.Cv", back_populates="user")
-    interviews = relationship("app.models.db_schemes.interview.Interview", back_populates="user")
+    cvs = relationship("Cv", back_populates="user", cascade="all, delete-orphan")
+    interviews = relationship("Interview", back_populates="user", cascade="all, delete-orphan")
