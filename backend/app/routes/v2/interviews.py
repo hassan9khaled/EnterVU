@@ -4,8 +4,9 @@ from typing import Union
 
 from app.schemes.interview_schemes import InterviewCreate, InterviewOut
 from app.schemes.questions_schemes import QuestionOut
+from app.schemes.response_schemes import OperationResponse
 from app.schemes.answers_schemes import AnswerOut, AnswerCreate
-
+from app.models.enums.ResponseEnums import OperationStatus
 
 from app.services.interview_service import InterviewService
 
@@ -26,6 +27,15 @@ async def start_interview(
     """
     return await interview_service.start_new_interview(interview_data=interview_data)
 
+@interviews_router.get("/{interview_id}", response_model=InterviewOut)
+async def get_interview_by_id(
+    interview_id: int,
+    interview_service: InterviewService = Depends()
+):
+    """
+    Fetch a specific interview by its ID including all related data.
+    """
+    return interview_service.get_interview_by_id(interview_id=interview_id)
 
 @interviews_router.get("/{interview_id}/next-question", response_model=Union[QuestionOut, dict])
 async def get_next_question(
@@ -52,6 +62,17 @@ async def submit_answer(
         answer_data=answer_data
     )
 
+@interviews_router.delete("/{interview_id}", response_model=OperationResponse, status_code=status.HTTP_200_OK)
+async def delete_interview(
+    interview_id: int,
+    interview_service: InterviewService = Depends()
+):
+    interview = interview_service.delete_interview_by_id(interview_id)
+
+    return OperationResponse(
+        message=OperationStatus.DELETED.value,
+        data=interview
+    )
 
 @interviews_router.post("/{interview_id}/finish", response_model=InterviewOut)
 async def finish_interview(

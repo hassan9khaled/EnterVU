@@ -1,13 +1,14 @@
 import os
 from fastapi import Depends, HTTPException, status, UploadFile
 from sqlalchemy.orm import Session
+from typing import List
 
 from app.controllers.FileController import FileController
 
 from app.integrations.google_adk.agents import cv_parsing_agent
 from app.integrations.google_adk.client import run_agent
 
-from app.models.db_schemes.cv import Cv
+from app.models.db_schemes import Cv, Interview
 from app.services import user_service
 from app.core.db import get_db
 
@@ -92,3 +93,31 @@ class CVService:
             Cv.id == cv_id,
             Cv.user_id == user_id
         ).first()
+    
+    def get_all_user_cvs(self, user_id: int) -> List[Cv] | None:
+
+        return self.db.query(Cv).filter(
+            Cv.user_id == user_id
+        ).all()
+
+    def delete_cv(self, user_id: int, cv_id: int):
+        cv = self.get_cv_by_id_and_user(cv_id=cv_id, user_id=user_id)
+        
+        # First, delete all interviews that use this CV
+        interviews_using_cv = self.db.query(Interview).filter(Interview.cv_id == cv_id).all()
+        
+        interview_ids = []
+        for interview in interviews_using_cv:
+            interview_ids.append(interview.id)
+            self.db.delete(interview)
+        
+        # Now it's safe to delete the CV
+        self.db.delete(cv)
+        self.db.commit()
+
+        return {
+            "cv_id": cv_id,
+            "deleted_interviews_count": len(interviews_using_cv),
+            "deleted_interview_ids": interview_ids,
+            "message": "CV and all related interviews deleted successfully"
+        }

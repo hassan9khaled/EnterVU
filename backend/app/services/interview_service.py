@@ -1,11 +1,17 @@
-import os
+import json
+from typing import List 
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import func
+
+from app.integrations.google_adk.agents import question_generation_agent
+from app.integrations.google_adk.client import run_agent
+from app.integrations.google_adk.prompts import QUESTION_GENERATION_SYSTEM_PROMPT
 
 from app.controllers.FileController import FileController
 from app.integrations.google_adk import mock_client
 from app.models import InterviewDecision, InterviewStatus
-from app.models.db_schemes import Interview, Question
+from app.models.db_schemes import Interview, Question, Topic, question_topic_table
 from app.schemes.answers_schemes import AnswerCreate
 from app.schemes.interview_schemes import InterviewCreate
 from app.schemes.questions_schemes import QuestionOut
@@ -38,14 +44,29 @@ class InterviewService:
         if not cv:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="CV not found for this user")
 
-        question_texts = await mock_client.generate_questions(
-            cv_text=cv.raw_text,
-            job_title=interview_data.job_title,
-            job_description=interview_data.job_description,
-            user_id=user.id
+        question_query = QUESTION_GENERATION_SYSTEM_PROMPT.substitute({
+            "job_title": interview_data.job_title,
+            "job_description": interview_data.job_description,
+            "n_questions": interview_data.mode.get_question_count(),
+            "parsed_cv_json": cv.raw_text,
+            "skills_to_focus": interview_data.skills_to_foucs
+        })
+
+        
+        questions_json = await run_agent(
+            agent=question_generation_agent,
+            query=question_query,
+            user_id=str(user.id)
         )
         
-        db_interview = self._create_interview_record_with_questions(interview_data, question_texts)
+        questions_list = json.loads(questions_json).get("questions", [])
+        
+        if not questions_list:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to generate questions")
+
+
+        db_interview = self._create_interview_record_with_questions(interview_data, questions_list)
+        
         self.db.commit()
         self.db.refresh(db_interview)
         return db_interview
@@ -125,7 +146,7 @@ class InterviewService:
 
         self._update_interview_as_completed(db_interview, final_score, decision)
         report_service.create_report(self.db, db_interview, report_content, report_path)
-        
+        self.db.flush()
         self.db.commit()
         self.db.refresh(db_interview)
         return db_interview
@@ -142,6 +163,15 @@ class InterviewService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Interview Not Found")
         return interview
 
+    def delete_interview_by_id(self, interview_id: int):
+        
+        db_interview = self.get_interview_by_id(interview_id=interview_id)
+        
+        self.db.delete(db_interview)
+        self.db.commit()
+
+        return {"interview_id":interview_id}
+
     def _create_interview_record_with_questions(self, interview_data: InterviewCreate, questions: list[str]) -> Interview:
         """Creates the parent Interview and its child Question records."""
         db_interview = Interview(
@@ -149,14 +179,49 @@ class InterviewService:
             cv_id=interview_data.cv_id,
             job_title=interview_data.job_title,
             job_description=interview_data.job_description,
-            status=InterviewStatus.IN_PROGRESS.value
+            status=InterviewStatus.IN_PROGRESS.value,
+            skills_to_foucs=interview_data.skills_to_foucs,
+            mode=interview_data.mode
         )
-        db_interview.questions.extend([
-            Question(text=text, order=i + 1) for i, text in enumerate(questions)
-        ])
+        topic_cache = {}
+
+        for i, question_data in enumerate(questions):
+            new_question = Question(
+                content=question_data.get("content"),
+                max_score=question_data.get("max_score"),
+                type=question_data.get("type"),
+                order=i + 1,
+            )
+
+            topics = question_data.get("topics", [])
+
+            topic_objects = self._get_or_create_topics(topics, topic_cache)
+
+            new_question.topics = topic_objects
+
+            db_interview.questions.append(new_question)
+
         self.db.add(db_interview)
         return db_interview
+    
+    def _get_or_create_topics(self, topics_names: List[str], cache: dict) -> List[Topic]:
+        """
+        Finds existing topics or creates new ones from a list of names.
+        """
+        if not topics_names:
+            return []
+        
+        final_topics = []
 
+        for name in topics_names:
+            if name in cache:
+                final_topics.append(cache[name])
+            else:
+                topic = self.db.merge(Topic(name=name))
+                final_topics.append(topic)
+                cache[name] = topic
+
+        return final_topics
     def _update_interview_as_completed(self, interview: Interview, score: float, decision: str):
         
         """Updates an interview record to mark it as complete."""

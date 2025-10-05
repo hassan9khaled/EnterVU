@@ -1,7 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from contextlib import asynccontextmanager
-# Routers from V1
 
+# Routers from V1
 from app.routes.v1 import base as base_v1
 from app.routes.v1 import users as users_v1
 from app.routes.v1 import cvs as cvs_v1
@@ -40,6 +42,28 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """
+    Handles Pydantic's RequestValidationError.
+
+    This function intercepts 422 Unprocessable Entity errors and formats them
+    into a more user-friendly, simplified JSON response.
+    """
+    # Create a simplified list of error messages
+    simplified_errors = []
+    for error in exc.errors():
+        field_name = " -> ".join(map(str, error["loc"]))
+        message = error["msg"]
+        simplified_errors.append(f"Error in field '{field_name}': {message}")
+    
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={
+            "detail": "Invalid input provided. Please check the errors.",
+            "errors": simplified_errors,
+        },
+    )
 # --- Include V1 Routers ---
 app.include_router(base_v1.base_router, prefix="/api/v1")
 app.include_router(users_v1.users_router, prefix="/api/v1")
