@@ -1,27 +1,33 @@
-from fastapi import APIRouter, FastAPI, Depends
-import os
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from app.core.config import get_settings, Settings
 
-# Create an API router for the base endpoints
+class RootResponse(BaseModel):
+    app_name: str
+    version: str
+
 base_router = APIRouter(
-    tags = ["api_v2"],
+    tags=["API Info"],
 )
 
-# Health check endpoint
-@base_router.get("/health")
+@base_router.get(
+    "/health",
+    summary="Health Check",
+    description="Performs a simple health check on the API to confirm it is running."
+)
 def health_check():
+    """Confirms the API is alive and responding."""
     return {"status": "ok"}
 
-# Root endpoint
-@base_router.get("/")
+@base_router.get(
+    "/",
+    response_model=RootResponse,
+    summary="Get API Information",
+    description="Returns the application's name and current version."
+)
 def root(app_settings: Settings = Depends(get_settings)):
-
-    # Retrieve app name and version from settings
-    app_name = app_settings.APP_NAME
-    app_version = app_settings.APP_VERSION
-
-    # Return the information as a JSON response
+    """Retrieves basic application information from the environment settings."""
     return {
-        "app_name": app_name,
-        "version": app_version
+        "app_name": app_settings.APP_NAME,
+        "version": app_settings.APP_VERSION
     }

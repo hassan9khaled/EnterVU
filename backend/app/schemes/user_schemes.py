@@ -1,8 +1,8 @@
-from pydantic import BaseModel
-from datetime import datetime
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 class UserBase(BaseModel):
-    email: str
+    email: EmailStr
     name: str | None = None
 
 class UserCreate(UserBase):
@@ -14,3 +14,7 @@ class UserOut(UserBase):
     class Config:
         from_attributes = True
         
+class UserUpdate(BaseModel):
+    """Schema for updating a user. All fields are optional."""
+    email: Optional[EmailStr] = None
+    name: Optional[str] = None

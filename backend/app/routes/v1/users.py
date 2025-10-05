@@ -16,7 +16,7 @@ logger = logging.getLogger('uvicorn.error')
 
 users_router = APIRouter(
     prefix = "/users",
-    tags = ["api_v1", "users"],
+    tags = ["Users"],
 )
 
 # User endpoint
