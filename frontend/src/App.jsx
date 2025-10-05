@@ -1,16 +1,16 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Header from './components/layout/Header.jsx';
-import DashboardPage from './pages/DashboardPage.jsx';
-import NewInterviewPage from './pages/NewInterviewPage.jsx';
-import InterviewReportPage from './pages/InterviewReportPage.jsx';
-import NotFoundPage from './pages/NotFoundPage.jsx';
+import Header from '~/components/layout/Header.jsx';
+import DashboardPage from '~/pages/DashboardPage.jsx';
+import NewInterviewPage from '~/pages/NewInterviewPage.jsx';
+import InterviewReportPage from '~/pages/InterviewReportPage.jsx';
+import NotFoundPage from '~/pages/NotFoundPage.jsx';
 
-function App() {
+const App = () => {
   return (
-    <>
+    <div className="flex flex-col min-h-screen bg-gray-50 font-sans">
       <Header />
-      <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+      <main className="flex-grow container mx-auto px-4 py-8">
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/new-interview" element={<NewInterviewPage />} />
@@ -18,9 +18,9 @@ function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
-    </>
+    </div>
   );
-}
+};
 
 export default App;
 
