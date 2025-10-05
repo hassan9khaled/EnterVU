@@ -7,9 +7,12 @@ pydantic==2.11.9
 SQLAlchemy==2.0.43
 psycopg2==2.9.10
 pytest==8.4.2
+pytest-asyncio==1.2.0
+pytest-dependency==0.6.0
 httpx==0.28.1
 langchain==0.3.27
 langchain-community==0.3.29
 google-adk==1.15.1
 aiofiles==24.1.0
 PyPDF2==3.0.1
+alembic==1.16.5
