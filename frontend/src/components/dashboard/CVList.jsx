@@ -17,8 +17,8 @@ const CVList = ({ cvs }) => {
             <div className="space-y-3">
                 {cvs.map(cv => (
                     <div key={cv.id} className="bg-gray-50 p-3 rounded-md border border-gray-200">
-                        <p className="font-medium text-gray-800 truncate">{cv.name}</p>
-                        <p className="text-xs text-gray-500">Uploaded: {cv.uploaded}</p>
+                        <p className="font-medium text-gray-800 truncate">{cv.file_name}</p>
+                        <p className="text-xs text-gray-500">Uploaded: {cv.uploaded_at ? new Date(cv.uploaded_at).toLocaleDateString('en-CA') : 'Invalid date'}</p>
                     </div>
                 ))}
             </div>

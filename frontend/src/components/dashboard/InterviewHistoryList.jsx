@@ -23,9 +23,9 @@ const InterviewHistoryList = ({ interviews }) => {
                     <tbody className="bg-white divide-y divide-gray-200">
                         {interviews.map(interview => (
                             <tr key={interview.id} className="hover:bg-gray-50">
-                                <td className="px-4 py-4 whitespace-nowrap text-sm">{interview.date}</td>
-                                <td className="px-4 py-4 whitespace-nowrap text-sm truncate max-w-xs">{interview.cvName}</td>
-                                <td className="px-4 py-4 whitespace-nowrap text-sm font-bold">{interview.overallScore}</td>
+                                <td className="px-4 py-4 whitespace-nowrap text-sm">{new Date(interview.created_at).toISOString().split('T')[0]}</td>
+                                <td className="px-4 py-4 whitespace-nowrap text-sm truncate max-w-xs">{interview.cvs.file_name}</td>
+                                <td className="px-4 py-4 whitespace-nowrap text-sm font-bold">{interview.final_score}</td>
                                 <td className="px-4 py-4 whitespace-nowrap">
                                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                         {interview.status}

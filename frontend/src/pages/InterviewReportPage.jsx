@@ -1,42 +1,70 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import ScoreSummary from '~/components/report/ScoreSummary.jsx';
 import SkillBreakdown from '~/components/report/SkillBreakdown.jsx';
 import Transcript from '~/components/report/Transcript.jsx';
-
-// Mock Data for a single Interview Report
-const mockInterviewReport = {
-    id: 'intv_abc123',
-    date: '2025-10-04',
-    overallScore: 88,
-    recommendation: 'Good Fit',
-    summary: "Hassan demonstrated strong technical skills in Python and a solid understanding of data structures. His problem-solving approach was methodical. Communication was clear, though some answers on system design could have been more detailed. Overall, a very capable candidate.",
-    skillBreakdown: [
-        { skill: 'Python Proficiency', score: 92 },
-        { skill: 'Data Structures & Algorithms', score: 90 },
-        { skill: 'System Design', score: 80 },
-        { skill: 'Communication', score: 85 },
-        { skill: 'Behavioral', score: 89 },
-    ],
-    transcript: [
-        {
-            question: "Can you explain the difference between a list and a tuple in Python?",
-            answer: "A list is mutable, meaning its elements can be changed, while a tuple is immutable. I'd use a list for a collection of items that might need to change, and a tuple for data that should remain constant, like coordinates.",
-            feedback: "Excellent. Your answer was accurate and you provided a great practical example."
-        },
-        {
-            question: "How would you approach designing a scalable web scraper?",
-            answer: "I would start with a message queue like RabbitMQ to manage the URLs to be scraped. Worker services would then pick up URLs, fetch the content, parse it, and store the results in a database. This architecture allows for easy scaling by just adding more workers.",
-            feedback: "This is a solid architectural approach. You correctly identified key components for scalability like a message queue and distributed workers."
-        }
-    ]
-};
+import { getInterviewReport } from '~/api/apiClient.js';
 
 const InterviewReportPage = () => {
-    const { id } = useParams();
-    // In a real app, you'd use the `id` to fetch data. Here, we'll just use the mock data.
-    const report = mockInterviewReport;
+    const { id } = useParams(); // Get the interview ID from the URL
+    const [interview, setInterview] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchReport = async () => {
+            if (!id) return;
+
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await getInterviewReport(id);
+                setInterview(response.data);
+            } catch (err) {
+                setError('Failed to fetch interview report. It might not exist or the server may be down.');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchReport();
+    }, [id]); // Re-run the effect if the ID in the URL changes
+
+    if (loading) {
+        return <div className="text-center">Loading interview report...</div>;
+    }
+
+    if (error) {
+        return (
+            <div className="text-center text-red-500">
+                <p>{error}</p>
+                <Link to="/" className="text-indigo-600 hover:underline mt-4 inline-block">Go back to Dashboard</Link>
+            </div>
+        );
+    }
+
+    // Check if the interview data or the nested report is missing
+    if (!interview) {
+        return <div className="text-center">No interview data available.</div>;
+    }
+    
+    if (!interview.report) {
+        return (
+             <div className="text-center">
+                <p>The report for this interview has not been generated yet.</p>
+                <Link to="/" className="text-indigo-600 hover:underline mt-4 inline-block">Go back to Dashboard</Link>
+            </div>
+        )
+    }
+
+    // Helper to format the date
+    const formattedDate = new Date(interview.created_at).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
 
     return (
         <div className="space-y-6">
@@ -47,22 +75,22 @@ const InterviewReportPage = () => {
                 </Link>
                 <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">Interview Report</h1>
                 <p className="text-gray-500 mt-1">
-                    Report for interview session on {report.date}
+                    Report for interview session on {formattedDate}
                 </p>
             </div>
             
             <ScoreSummary 
-                score={report.overallScore} 
-                recommendation={report.recommendation} 
-                summary={report.summary} 
+                score={interview.score} 
+                recommendation={interview.decision} 
+                summary={interview.report.summary} 
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 <div className="lg:col-span-1">
-                    <SkillBreakdown skills={report.skillBreakdown} />
+                    <SkillBreakdown skills={interview.report.skillBreakdown} />
                 </div>
                 <div className="lg:col-span-2">
-                    <Transcript transcript={report.transcript} />
+                    <Transcript transcript={interview.report.transcript} />
                 </div>
             </div>
         </div>
