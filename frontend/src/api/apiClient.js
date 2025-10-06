@@ -30,5 +30,34 @@ export const getCvs = () => {
   return apiClient.get('/cvs/'); // Example endpoint
 };
 
+export const getUser = (userId) => {
+  return apiClient.get(`/users/${userId}`);
+};
+
+/**
+ * Uploads a new CV file.
+ * @param {FormData} formData - The form data containing the file.
+ */
+// api/apiClient.js
+export const uploadCv = (file, userId) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('user_id', userId); // Must match FastAPI's Form field name
+
+  return apiClient.post('/cvs/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
+/**
+ * Starts a new interview session.
+ * @param {object} interviewData - The data for the new interview.
+ */
+export const startInterview = (interviewData) => {
+    return apiClient.post('/interviews/start', interviewData);
+};
+
 export default apiClient;
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrainCircuit } from 'lucide-react';
+import EnterVU from '~/assets/EnterVU_logo.png';
 import { Link } from 'react-router-dom';
 
 const Header = () => {
@@ -8,8 +9,12 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-3">
-            <BrainCircuit className="h-8 w-8 text-indigo-600" />
-            <h1 className="text-xl font-bold text-gray-900">AI Interview System</h1>
+            <img
+              src={EnterVU}
+              alt="EnterVU Logo"
+              className="h-20 w-10 object-contain"
+            />
+            <h1 className="text-xl font-bold text-gray-900">EnterVU</h1>
           </Link>
           <div className="flex items-center space-x-4">
              <div className="text-right">

@@ -1,10 +1,11 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Header from '~/components/layout/Header.jsx';
-import DashboardPage from '~/pages/DashboardPage.jsx';
-import NewInterviewPage from '~/pages/NewInterviewPage.jsx';
-import InterviewReportPage from '~/pages/InterviewReportPage.jsx';
-import NotFoundPage from '~/pages/NotFoundPage.jsx';
+import { Routes, Route } from 'react-router-dom'; // ← Only import Routes and Route
+import Header from './components/layout/Header.jsx';
+import DashboardPage from './pages/DashboardPage.jsx';
+import NewInterviewPage from './pages/NewInterviewPage.jsx';
+import InterviewReportPage from './pages/InterviewReportPage.jsx';
+import LiveInterviewPage from './pages/LiveInterviewPage.jsx';
+import NotFoundPage from './pages/NotFoundPage.jsx';
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/new-interview" element={<NewInterviewPage />} />
           <Route path="/report/:id" element={<InterviewReportPage />} />
+          <Route path="/interview/:id" element={<LiveInterviewPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
@@ -23,4 +25,3 @@ const App = () => {
 };
 
 export default App;
-
