@@ -7,27 +7,62 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+apiClient.interceptors.request.use((config) => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+        try {
+            const user = JSON.parse(userData);
+            if (user && user.id) {
+                // Add user_id to query params for GET requests
+                if (config.method === 'get') {
+                    config.params = { ...config.params, user_id: user.id };
+                }
+                // Add user_id to data for POST requests
+                if (config.method === 'post' && config.data) {
+                    if (config.data instanceof FormData) {
+                        config.data.append('user_id', user.id);
+                    } else {
+                        config.data = { ...config.data, user_id: user.id };
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Failed to parse user data from localStorage');
+        }
+    }
+    return config;
+}, (error) => {
+    return Promise.reject(error);
+});
 
 /**
  * Fetches a list of all interview sessions.
  */
-export const getInterviews = () => {
-  return apiClient.get('/interviews/'); // Example endpoint
+export const getInterviews = (userId) => {
+  return apiClient.get('/interviews/', {
+    params: { user_id: userId } // Explicitly pass user_id
+  });
 };
-
 /**
  * Fetches the detailed report for a single interview.
  * @param {string} interviewId - The ID of the interview to fetch.
  */
 export const getInterviewReport = (interviewId) => {
-  return apiClient.get(`/interviews/${interviewId}/report`); // Example endpoint
+  return apiClient.get(`/interviews/${interviewId}`); // Example endpoint
 };
 
 /**
  * Fetches the list of CVs for the user.
  */
-export const getCvs = () => {
-  return apiClient.get('/cvs/'); // Example endpoint
+export const getCvs = (userId) => {
+  return apiClient.get('/cvs/user/', {
+    params: { user_id: userId } // Explicitly pass user_id
+  });
+};
+export const deleteCv = (cvId, userId) => {
+  return apiClient.delete(`/cvs/`, {
+    params: { user_id: userId , cv_id: cvId } // Explicitly pass user_id
+  });
 };
 
 export const getUser = (userId) => {
@@ -58,6 +93,56 @@ export const uploadCv = (file, userId) => {
 export const startInterview = (interviewData) => {
     return apiClient.post('/interviews/start', interviewData);
 };
+
+/**
+ * Fetches the next question for an ongoing interview.
+ * @param {string} interviewId - The ID of the current interview.
+ */
+export const getNextQuestion = (interviewId) => {
+    return apiClient.get(`/interviews/${interviewId}/next-question`);
+};
+
+/**
+ * Submits an answer for the current question.
+ * @param {string} interviewId - The ID of the current interview.
+ * @param {object} answerData - The answer payload (question_id, content).
+ */
+export const submitAnswer = (interviewId, answerData) => {
+    return apiClient.post(`/interviews/${interviewId}/answer`, answerData);
+};
+
+/**
+ * Finalizes an interview session.
+ * @param {string} interviewId - The ID of the interview to finish.
+ */
+export const finishInterview = (interviewId) => {
+    return apiClient.post(`/interviews/${interviewId}/finish`);
+};
+// api/apiClient.js
+
+/**
+ * Registers a new user.
+ * @param {string} name - Full name of the user
+ * @param {string} email - User's email
+ * @param {string} password - User's password
+ */
+export const registerUser = (name, email, password) => {
+  return apiClient.post('/users/', {
+    name,
+    email,
+    password,
+  });
+};
+
+/**
+ * Logs in a user and returns auth token + user data.
+ * @param {string} email
+ * @param {string} password
+ */
+export const loginUser = (email, password) => {
+  return apiClient.post('/users/login', { email, password });
+};
+
 
 export default apiClient;
 
