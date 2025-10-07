@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, status
 
 from app.models.db_schemes import User
-from app.schemes.user_schemes import UserCreate, UserUpdate
+from app.schemes.user_schemes import UserCreate, UserUpdate, LoginRequest
 from app.core.db import get_db
 
 class UserService:
@@ -27,6 +27,25 @@ class UserService:
         """Retrieves a user from the database by their email."""
         return self.db.query(User).filter(User.email == email).first()
 
+    def user_login(self, user_data: LoginRequest) -> Optional[User]:
+        
+        user_email = user_data.email
+        user_password = user_data.password
+
+        db_user = self.get_user_by_email(user_email)
+
+        if not db_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with email {user_email} not found"
+            )
+        if db_user.password == user_password:
+            return db_user
+        else:
+             raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail=f"Wrong password or email"
+             )           
     def get_user_by_id(self, user_id: int) -> User:
         """Retrieves a user by ID, raising a 404 error if not found."""
         user = self.db.query(User).filter(User.id == user_id).first()

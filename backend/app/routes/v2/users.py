@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, status, Query
 
-from app.schemes.user_schemes import UserCreate, UserOut, UserUpdate
+from app.schemes.user_schemes import UserCreate, UserOut, UserUpdate, LoginRequest
 from app.schemes.response_schemes import OperationResponse
 from app.services.user_service import UserService
 
@@ -54,6 +54,14 @@ def get_user(user_id: int, user_service: UserService = Depends()):
     If a user with the specified ID is not found, a `404 Not Found` error is returned.
     """
     return user_service.get_user_by_id(user_id=user_id)
+
+@users_router.post(
+    "/login",
+    response_model=UserOut,
+    summary="User Login",
+)
+def login(user_data: LoginRequest, user_service: UserService = Depends()):
+    return user_service.user_login(user_data=user_data)
 
 @users_router.delete(
     "/{user_id}",
