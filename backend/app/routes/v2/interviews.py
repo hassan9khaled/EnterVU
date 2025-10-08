@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, status
-from typing import Union
-
+from typing import Union, List
 
 from app.schemes.interview_schemes import InterviewCreate, InterviewOut
 from app.schemes.questions_schemes import QuestionOut
@@ -26,6 +25,16 @@ async def start_interview(
     Starts a new interview session by validating inputs and generating questions.
     """
     return await interview_service.start_new_interview(interview_data=interview_data)
+
+@interviews_router.get("/", response_model=List[InterviewOut])
+async def get_all_interviews(
+    user_id: int,
+    interview_service: InterviewService = Depends(),
+):
+    """
+    Retrieves a list of all past interviews for the current user.
+    """
+    return interview_service.get_all_interviews_for_user(user_id=user_id)
 
 @interviews_router.get("/{interview_id}", response_model=InterviewOut)
 async def get_interview_by_id(

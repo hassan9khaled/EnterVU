@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 from datetime import datetime
 from typing import List, Optional
 from .report_schemas import ReportOut
@@ -23,7 +23,8 @@ class InterviewOut(BaseModel):
     cvs: CvOut
     job_title: str
     questions: List[QuestionOut] = []
-    score: float | None = None
+    final_score: float | None = None
+    status: str
     decision: str | None = None
     report: ReportOut | None = None
     mode: str

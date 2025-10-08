@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from contextlib import asynccontextmanager
 
@@ -16,11 +17,19 @@ from app.routes.v2 import cvs as cvs_v2
 from app.routes.v2 import interviews as interviews_v2
 
 from app.core import db
+from app.core.config import get_settings
 import logging
 
 logger = logging.getLogger('uvicorn.error')
 
+origins = [
+    "http://localhost",
+    "http://localhost:8080",
+    "http://localhost:5173",
+]
 
+app_name = get_settings().APP_NAME
+app_version = get_settings().APP_VERSION
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -36,12 +45,18 @@ async def lifespan(app: FastAPI):
     
 
 app = FastAPI(
-    title="AI Interview System",
+    title=app_name,
     description="MVP for AI-powered interview preparation and evaluation",
-    version="0.1",
+    version=app_version,
     lifespan=lifespan
 )
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins, # Allows specific origins
+    allow_credentials=True, # Allows cookies to be included in cross-origin requests
+    allow_methods=["*"],    # Allows all methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],    # Allows all headers in the request
+)
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """
