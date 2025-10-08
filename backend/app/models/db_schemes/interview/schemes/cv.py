@@ -12,6 +12,7 @@ class Cv(Base):
 
     raw_text = Column(Text, nullable=False)
     file_path = Column(String)
+    file_name = Column(String)
 
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 

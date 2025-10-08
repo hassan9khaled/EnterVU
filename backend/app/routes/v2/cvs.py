@@ -26,12 +26,13 @@ async def upload_cv(
 
     return new_cv
 
-@cvs_router.get("/", response_model=List[CvOut])
+@cvs_router.get("/user", response_model=List[CvOut])
 async def get_user_cvs(
-    user_id: int = Query(),
+    user_id: int,
     cv_service: CVService = Depends()
 ):
     return cv_service.get_all_user_cvs(user_id=user_id)
+
 @cvs_router.delete("/")
 async def delete_cv(
     user_id: int = Query(),

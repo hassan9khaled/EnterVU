@@ -10,6 +10,7 @@ class CvOut(BaseModel):
     user_id: int
     raw_text: str
     file_path: str | None = None
+    file_name: str
     uploaded_at: datetime
 
     class Config:

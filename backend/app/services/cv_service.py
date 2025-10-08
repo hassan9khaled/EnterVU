@@ -9,7 +9,7 @@ from app.integrations.google_adk.agents import cv_parsing_agent
 from app.integrations.google_adk.client import run_agent
 
 from app.models.db_schemes import Cv, Interview
-from app.services import user_service
+from app.services.user_service import UserService
 from app.core.db import get_db
 
 class CVService:
@@ -18,13 +18,15 @@ class CVService:
     def __init__(
         self,
         db: Session = Depends(get_db),
-        file_controller: FileController = Depends()
+        file_controller: FileController = Depends(),
+        user_service: UserService = Depends()
     ):
         """
         Initializes the service with its dependencies, injected by FastAPI.
         """
         self.db = db
         self.file_controller = file_controller
+        self.user_service = user_service
 
     async def process_and_create_cv(self, user_id: int, file: UploadFile) -> Cv:
         """
@@ -32,6 +34,7 @@ class CVService:
         DB creation, and cleanup on failure.
         """
         file_path = None  # Initialize to ensure it exists for the cleanup block
+        file_name = file.filename.replace(".pdf", "") # Remove the file extension
 
         try:
             # Step 1: Validate the file using the controller
@@ -56,7 +59,8 @@ class CVService:
             return self._create_cv_record(
                 user_id=user_id,
                 file_path=file_path,
-                raw_text=parsed_text  # Assuming you save the parsed JSON here
+                raw_text=parsed_text,
+                file_name=file_name  
             )
         except Exception as e:
             
@@ -68,11 +72,11 @@ class CVService:
             # correct error response for the client.
             raise e
 
-    def _create_cv_record(self, user_id: int, file_path: str, raw_text: str) -> Cv:
+    def _create_cv_record(self, user_id: int, file_path: str, raw_text: str, file_name: str) -> Cv:
         """
         Private method to handle the final database transaction.
         """
-        user = user_service.get_user(db=self.db, user_id=user_id)
+        user = self.user_service.get_user_by_id(user_id=user_id)
         if not user:
             
             raise HTTPException(
@@ -80,7 +84,7 @@ class CVService:
                 detail=f"User with id {user_id} is not found"
             )
 
-        db_cv = Cv(user_id=user_id, raw_text=raw_text, file_path=file_path)
+        db_cv = Cv(user_id=user_id, raw_text=raw_text, file_path=file_path, file_name=file_name)
         self.db.add(db_cv)
         self.db.commit()
         self.db.refresh(db_cv)
