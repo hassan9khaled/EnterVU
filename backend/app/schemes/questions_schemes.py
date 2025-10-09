@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, validator
-from typing import Optional, List
+from typing import Optional, List, Literal
 from .answers_schemes import AnswerOut
 from app.models.enums.QuestionEnums import QuestionType
 
@@ -7,8 +7,8 @@ from app.models.enums.QuestionEnums import QuestionType
 class QuestionCreate(BaseModel):
 
     content: str
-    max_score: float = Field(..., ge=0, le=10, description="Score must be between 0 and 10")
-    type: QuestionType
+    max_score: int = Field(..., ge=0, le=10, description="Score must be between 0 and 10")
+    type: str
     topics: List[str] = Field(..., description="All topics must be in lower case")
     @validator('topics', each_item=True, pre=True)
     def convert_topics_to_lowercase(cls, v):

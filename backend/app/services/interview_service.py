@@ -7,7 +7,7 @@ from sqlalchemy import func
 
 from app.integrations.google_adk.agents import question_generation_agent
 from app.integrations.google_adk.client import run_agent
-from app.integrations.google_adk.prompts import QUESTION_GENERATION_SYSTEM_PROMPT
+from app.integrations.google_adk.prompts import GENERATOR_INSTRUCTION
 
 from app.controllers.FileController import FileController
 from app.integrations.google_adk import mock_client
@@ -48,18 +48,27 @@ class InterviewService:
         if not cv:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="CV not found for this user")
 
-        question_query = QUESTION_GENERATION_SYSTEM_PROMPT.substitute({
+        question_query ={
             "job_title": interview_data.job_title,
             "job_description": interview_data.job_description,
             "n_questions": interview_data.mode.get_question_count(),
             "parsed_cv_json": cv.raw_text,
             "skills_to_focus": interview_data.skills_to_foucs
-        })
+        }
 
+        question_prompt = f"""
+        Generate interview questions based on the following information:
+
+        - Job Title: {question_query['job_title']}
+        - Job Description: "{question_query['job_description']}"
+        - Skills to Focus On: {question_query['skills_to_focus']}
+        - Candidate CV (JSON): {question_query['parsed_cv_json']}
+        - Number of Questions to Generate: {question_query['n_questions']}
+        """
         
         questions_json = await run_agent(
             agent=question_generation_agent,
-            query=question_query,
+            query=question_prompt,
             user_id=str(user.id)
         )
         
