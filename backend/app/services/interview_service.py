@@ -5,21 +5,23 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 
-from app.integrations.google_adk.agents import question_generation_agent
+from app.integrations.google_adk.agents import (
+    question_generation_agent,
+    answer_evaluation_agent,
+    final_report_agent,
+)
+
 from app.integrations.google_adk.client import run_agent
-from app.integrations.google_adk.prompts import GENERATOR_INSTRUCTION
 
 from app.controllers.FileController import FileController
-from app.integrations.google_adk import mock_client
-from app.models import InterviewDecision, InterviewStatus
-from app.models.db_schemes import Interview, Question, Topic, question_topic_table
+from app.models import InterviewStatus
+from app.models.db_schemes import Interview, Question, Topic
 from app.schemes.answers_schemes import AnswerCreate
 from app.schemes.interview_schemes import InterviewCreate
 from app.schemes.questions_schemes import QuestionOut
-from app.services.user_service import UserService
 from app.services import (
-    CVService, question_service, 
-    answer_service, report_service
+    CVService, question_service, UserService,
+    answer_service, ReportService, EmailService
 )
 from app.core.db import get_db
 
@@ -29,18 +31,24 @@ class InterviewService:
         db: Session = Depends(get_db),
         file_controller: FileController = Depends(),
         cv_service: CVService = Depends(),
-        user_service: UserService = Depends()
+        user_service: UserService = Depends(),
+        report_service: ReportService = Depends(),
+        email_service: EmailService = Depends(),
     ):
         self.db = db
         self.file_controller = file_controller
         self.cv_service = cv_service
         self.user_service = user_service
+        self.report_service = report_service
+        self.email_service = email_service
+        user = None
 
     async def start_new_interview(self, interview_data: InterviewCreate) -> Interview:
         """
         Orchestrates validation, AI question generation, and saving a new interview.
         """
         user = self.user_service.get_user_by_id(user_id=interview_data.user_id)
+
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
@@ -69,7 +77,7 @@ class InterviewService:
         questions_json = await run_agent(
             agent=question_generation_agent,
             query=question_prompt,
-            user_id=str(user.id)
+            user_id=interview_data.user_id
         )
         
         questions_list = json.loads(questions_json).get("questions", [])
@@ -116,18 +124,32 @@ class InterviewService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question Not Found")
         if db_question.answer is not None:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This question has already been answered.")
-
-        evaluation = await mock_client.evaluate_answer(question=db_question.content, answer=answer_data.user_answer)
         
+        eval_prompt = f"""
+                **Context:**
+                - **`question_text`**: "{db_question.content}"
+                - **`answer_text`**: "{answer_data.user_answer}"
+            """
+        
+        evaluation = await run_agent(
+            agent=answer_evaluation_agent,
+            query=eval_prompt,
+            user_id=db_interview.user_id
+        )
+
+        answer= json.loads(evaluation)
+
         db_answer = answer_service.create_answer(
             db=self.db,
             question_id=answer_data.question_id,
             user_answer=answer_data.user_answer,
-            score=evaluation.get("score"),
-            feedback=evaluation.get("feedback")
+            score=answer.get("score"),
+            feedback=answer.get("feedback")
         )
+
         self.db.commit()
         self.db.refresh(db_answer)
+
         return db_answer
 
     async def finish_and_generate_report(self, interview_id: int) -> Interview:
@@ -143,25 +165,60 @@ class InterviewService:
         if len(db_answers) != len(db_interview.questions):
              raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not all questions have been answered yet!")
         
-        final_score, decision = self._calculate_final_score_and_decision(db_answers)
+        average_score = self._calculate_final_score(db_answers)
 
-        report_content = await mock_client.generate_final_report(
-            questions=db_interview.questions, answers=db_answers, feedbacks="feedbacks for each answer"
+        report_input_data ={
+            "user_name": db_interview.user.name,
+            "job_title": db_interview.job_title,
+            "average_score": average_score,
+            "interview_transcript": db_interview.questions,
+        }
+
+        report_prompt = f"""
+        - User Name: {report_input_data['user_name']}
+        - Job Title: "{report_input_data['job_title']}"
+        - Average Score: {report_input_data['average_score']}
+        - Interview Transcript: {report_input_data['interview_transcript']}
+        """
+        agent_response = await run_agent(
+            agent=final_report_agent,
+            query=report_prompt,
+            user_id=db_interview.user_id,  
         )
-        
-        
+
+        report_contents = json.loads(agent_response)
+
         report_path = self.file_controller.get_interview_report_path(
             user_id=db_interview.user_id, interview_id=interview_id
         )
+        report_content = report_contents.get("content")
 
         with open(report_path, "w+") as report_file:
             report_file.write(report_content)
 
-        self._update_interview_as_completed(db_interview, final_score, decision)
-        report_service.create_report(self.db, db_interview, report_content, report_path)
+        self._update_interview_as_completed(db_interview, average_score, report_contents.get("decision"))
+
+        sent_to_email = self.email_service.send_email(
+            user_email=db_interview.user.email,
+            subject=report_contents.get("email_subject"),
+            body=report_contents.get("email_body")
+        )
+
+        report = self.report_service.create_report(
+            interview = db_interview,
+            report_content = report_content,
+            file_path=report_path,
+            sent_to_email=sent_to_email,
+            strengths=report_contents.get("strengths", []),
+            areas_for_improvement=report_contents.get("areas_for_improvement", [])
+        )
+        if not report:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to generate the report.")
+        
         self.db.flush()
         self.db.commit()
         self.db.refresh(db_interview)
+
         return db_interview
 
     def get_interview_by_id(self, interview_id: int) -> Interview:
@@ -284,19 +341,12 @@ class InterviewService:
         interview.decision = decision
         self.db.add(interview)
 
-    def _calculate_final_score_and_decision(self, answers: list) -> tuple[int, str]:
+    def _calculate_final_score(self, answers: list) -> int:
         """Calculates the final score and determines the outcome."""
         if not answers:
-            return 0, InterviewDecision.REJECTED.value
+            return 0
             
         total_score = sum(ans.score for ans in answers if ans.score is not None)
-        final_score = total_score * 10 / len(answers)
-
-        if final_score >= 7:
-            decision = InterviewDecision.ACCEPTED.value
-        elif final_score >= 5:
-            decision = InterviewDecision.NEEDS_IMPROVEMENT.value
-        else:
-            decision = InterviewDecision.REJECTED.value
+        avg_score = total_score / len(answers)
             
-        return final_score, decision
+        return avg_score

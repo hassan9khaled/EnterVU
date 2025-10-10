@@ -10,8 +10,8 @@ load_dotenv()
 
 _session_service = InMemorySessionService()
 
-
-async def run_agent(agent: Agent, query: str, user_id: str) -> str:
+# TODO: Add a session states to each agent and make them run all in the same session
+async def run_agent(agent: Agent, query: str, user_id: int) -> str:
     """
     A reusable async function to run any ADK agent.
 
@@ -19,7 +19,7 @@ async def run_agent(agent: Agent, query: str, user_id: str) -> str:
     """
     APP_NAME = "ai_interview_app"
     session_id = str(uuid.uuid4()) # Create a new session for each distinct task
-
+    user_id = str(user_id)
     # The runner is created on-the-fly for the specific agent
     runner = Runner(
         agent=agent,
