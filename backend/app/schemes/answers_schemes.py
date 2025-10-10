@@ -1,4 +1,4 @@
-from pydantic import BaseModel  
+from pydantic import BaseModel, Field  
 
 class AnswerCreate(BaseModel):
     question_id: int
@@ -13,3 +13,18 @@ class AnswerOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+class AnswerEvaluation(BaseModel):
+    """
+    Defines the structured output for the AI agent that evaluates a single answer.
+    """
+    score: float = Field(
+        ...,
+        ge=0,
+        le=10,
+        description="A score from 0.0 to 10.0 evaluating the answer's quality."
+    )
+    feedback: str = Field(
+        ...,
+        description="Concise, constructive, and encouraging feedback for the user, explaining the score."
+    )
