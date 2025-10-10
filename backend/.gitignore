@@ -9,6 +9,7 @@ __pycache__/
 # User uploads and assets
 app/assets/cvs/
 app/assets/reports/
+app/assets/creds/
 
 # Databases
 *.db

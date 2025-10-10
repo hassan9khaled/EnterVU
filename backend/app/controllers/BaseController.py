@@ -1,4 +1,5 @@
-from app.core.config import get_settings, Settings
+from app.core.config import get_settings
+
 import os
 import random
 import string
@@ -17,6 +18,10 @@ class BaseController:
         self.reports_dir = os.path.join(
             self.base_dir,
             "assets/reports"
+        )
+        self.creds_dir = os.path.join(
+            self.base_dir,
+            "assets/creds"
         )
         
     def generate_random_string(self, length: int=12):

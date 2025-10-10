@@ -6,7 +6,6 @@ pydantic-settings==2.10.1
 pydantic==2.11.9
 pydantic[email]==2.11.9
 SQLAlchemy==2.0.43
-psycopg2==2.9.10
 pytest==8.4.2
 pytest-asyncio==1.2.0
 pytest-dependency==0.6.0
@@ -17,3 +16,6 @@ google-adk==1.15.1
 aiofiles==24.1.0
 PyPDF2==3.0.1
 alembic==1.16.5
+google-api-python-client==2.184.0
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.2
