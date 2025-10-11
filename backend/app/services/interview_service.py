@@ -1,6 +1,6 @@
 import json
 import re
-from typing import List 
+from typing import List, Union
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
@@ -18,7 +18,7 @@ from app.models import InterviewStatus
 from app.models.db_schemes import Interview, Question, Topic
 from app.schemes.answers_schemes import AnswerCreate
 from app.schemes.interview_schemes import InterviewCreate
-from app.schemes.questions_schemes import QuestionOut
+from app.schemes.questions_schemes import QuestionOut, NextQuestionResponse
 from app.services import (
     CVService, question_service, UserService,
     answer_service, ReportService, EmailService
@@ -92,7 +92,7 @@ class InterviewService:
         self.db.refresh(db_interview)
         return db_interview
 
-    def get_next_question(self, interview_id: int) -> QuestionOut:
+    def get_next_question(self, interview_id: int) -> Union[NextQuestionResponse, dict]:
         """
         Fetches the next unanswered question for an ongoing interview.
         """
@@ -107,7 +107,12 @@ class InterviewService:
             
             return {"message": "All questions have been answered. Please finish the interview."}
         
-        return next_question
+        question_out = QuestionOut.model_validate(next_question)
+        
+        return {
+            "question": question_out,
+            "total_questions": len(db_interview.questions)
+        }
 
     async def submit_and_evaluate_answer(self, interview_id: int, answer_data: AnswerCreate):
         """
@@ -196,7 +201,7 @@ class InterviewService:
         with open(report_path, "w+") as report_file:
             report_file.write(report_content)
 
-        self._update_interview_as_completed(db_interview, average_score, report_contents.get("decision"))
+        self._update_interview_as_completed(db_interview, average_score, report_contents.get("final_decision"))
 
         sent_to_email = self.email_service.send_email(
             user_email=db_interview.user.email,

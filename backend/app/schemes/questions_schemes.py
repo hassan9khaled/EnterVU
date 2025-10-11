@@ -33,8 +33,11 @@ class QuestionOut(QuestionCreate):
     class Config:
         from_attributes = True
 
+class NextQuestionResponse(BaseModel):
 
-        
+    question: QuestionOut
+    total_questions: int
+
 
 class QuestionOutAgent(BaseModel):
     questions: List[QuestionCreate]

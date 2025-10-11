@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from typing import Union, List
 
 from app.schemes.interview_schemes import InterviewCreate, InterviewOut
-from app.schemes.questions_schemes import QuestionOut
+from app.schemes.questions_schemes import NextQuestionResponse
 from app.schemes.response_schemes import OperationResponse
 from app.schemes.answers_schemes import AnswerOut, AnswerCreate
 from app.models.enums.ResponseEnums import OperationStatus
@@ -46,7 +46,7 @@ async def get_interview_by_id(
     """
     return interview_service.get_interview_by_id(interview_id=interview_id)
 
-@interviews_router.get("/{interview_id}/next-question", response_model=Union[QuestionOut, dict])
+@interviews_router.get("/{interview_id}/next-question", response_model=Union[NextQuestionResponse, dict])
 async def get_next_question(
     interview_id: int,
     interview_service: InterviewService = Depends()
