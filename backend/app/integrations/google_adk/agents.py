@@ -3,7 +3,7 @@ from google.adk.tools import google_search, AgentTool
 from google.genai import types
 
 from app.schemes.questions_schemes import QuestionOutAgent
-from app.schemes.answers_schemes import AnswerEvaluation
+from app.schemes.answers_schemes import AnswerEvaluationAgent
 from app.schemes.report_schemas import FinalReportOutput
 from . import prompts
 
@@ -57,9 +57,9 @@ question_generation_agent = LlmAgent(
 answer_evaluation_agent = LlmAgent(
     name="answer_evaluation_agent",
     model=MODEL,
-    description="Evaluates a candidate's answer to an interview question.",
+    description="Evaluates a candidate's answers to an interview questions.",
     instruction=prompts.ANSWER_EVALUATION_SYSTEM_PROMPT,
-    output_schema=AnswerEvaluation,
+    output_schema=AnswerEvaluationAgent,
     generate_content_config=types.GenerateContentConfig(
         response_mime_type="application/json",
     ),

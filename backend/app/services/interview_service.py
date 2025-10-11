@@ -1,7 +1,7 @@
 import json
 import re
 from typing import List, Union
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 
@@ -15,7 +15,7 @@ from app.integrations.google_adk.client import run_agent
 
 from app.controllers.FileController import FileController
 from app.models import InterviewStatus
-from app.models.db_schemes import Interview, Question, Topic
+from app.models.db_schemes import Interview, Question, Topic, Answer
 from app.schemes.answers_schemes import AnswerCreate
 from app.schemes.interview_schemes import InterviewCreate
 from app.schemes.questions_schemes import QuestionOut, NextQuestionResponse
@@ -114,7 +114,7 @@ class InterviewService:
             "total_questions": len(db_interview.questions)
         }
 
-    async def submit_and_evaluate_answer(self, interview_id: int, answer_data: AnswerCreate):
+    async def submit_answer(self, interview_id: int, answer_data: AnswerCreate):
         """
         Validates, evaluates an answer using an AI, and saves it to the database.
         """
@@ -125,39 +125,80 @@ class InterviewService:
         
         
         db_question = question_service.get_question_by_id(db=self.db, question_id=answer_data.question_id, interview_id=interview_id)
+        
         if not db_question:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question Not Found")
         if db_question.answer is not None:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This question has already been answered.")
         
-        eval_prompt = f"""
-                **Context:**
-                - **`question_text`**: "{db_question.content}"
-                - **`answer_text`**: "{answer_data.user_answer}"
-            """
+        # eval_prompt = f"""
+        #         **Context:**
+        #         - **`question_text`**: "{db_question.content}"
+        #         - **`answer_text`**: "{answer_data.user_answer}"
+        #     """
         
-        evaluation = await run_agent(
-            agent=answer_evaluation_agent,
-            query=eval_prompt,
-            user_id=db_interview.user_id
-        )
+        # evaluation = await run_agent(
+        #     agent=answer_evaluation_agent,
+        #     query=eval_prompt,
+        #     user_id=db_interview.user_id
+        # )
 
-        answer= json.loads(evaluation)
+        # answer= json.loads(evaluation)
 
         db_answer = answer_service.create_answer(
             db=self.db,
             question_id=answer_data.question_id,
             user_answer=answer_data.user_answer,
-            score=answer.get("score"),
-            feedback=answer.get("feedback")
+            score=None,
+            feedback=None
         )
 
         self.db.commit()
         self.db.refresh(db_answer)
 
         return db_answer
+    
+    async def _evaluate_answers(self, user_id: int, questions: List[QuestionOut], db_answers: List[Answer]):
+        """
+        Prepares the context and calls the AI agent to evaluate all answers in a single batch.
+        Updates the answer records in the database safely using a dictionary lookup.
+        """
+        transcript_for_ai = [
+            {
+                "question_id": answer.question_id,
+                "question_text": answer.question.content,
+                "user_answer": answer.user_answer,
+                "max_score": answer.question.max_score,
+                "type": answer.question.type,
 
-    async def finish_and_generate_report(self, interview_id: int) -> Interview:
+
+            }
+            
+            for answer in db_answers
+        ]
+
+        evaluations_json = await run_agent(
+            agent=answer_evaluation_agent,
+            query=json.dumps(transcript_for_ai),
+            user_id=user_id
+        )
+
+        evaluated_answers = json.loads(evaluations_json).get("answers", [])
+
+        answers_map = {answer.question_id: answer for answer in db_answers}
+
+        for evaluation in evaluated_answers:
+            q_id = evaluation.get("question_id")
+            if q_id in answers_map:
+                db_answer_to_update = answers_map[q_id]
+                db_answer_to_update.score = evaluation.get("score")
+                db_answer_to_update.feedback = evaluation.get("feedback")
+                self.db.add(db_answer_to_update) 
+            else:
+                print(f"Warning: AI returned evaluation for unknown question_id: {q_id}")
+
+
+    async def finish_and_generate_report(self, interview_id: int, background_tasks: BackgroundTasks) -> Interview:
         """
         Finishes an interview, calculates the score, generates a report, and saves it.
         """
@@ -167,8 +208,21 @@ class InterviewService:
             return db_interview # Already finished, just return the result
 
         db_answers = answer_service.get_all_answers_for_interview(db=self.db, interview_id=interview_id)
+        
         if len(db_answers) != len(db_interview.questions):
              raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not all questions have been answered yet!")
+        
+        questions = []
+
+        for question in db_interview.questions:
+            q = QuestionOut.model_validate(question)
+            questions.append(q)
+
+        _ = await self._evaluate_answers(
+            user_id=db_interview.user_id,
+            questions=questions,
+            db_answers=db_answers
+        )
         
         average_score = self._calculate_final_score(db_answers)
 
@@ -198,24 +252,29 @@ class InterviewService:
         )
         report_content = report_contents.get("content")
 
-        with open(report_path, "w+") as report_file:
-            report_file.write(report_content)
+        # with open(report_path, "w+") as report_file:
+        #     report_file.write(report_content)
 
         self._update_interview_as_completed(db_interview, average_score, report_contents.get("final_decision"))
 
-        sent_to_email = self.email_service.send_email(
+        # sent_to_email = self.email_service.send_email(
+        #     user_email=db_interview.user.email,
+        #     subject=report_contents.get("email_subject"),
+        #     body=report_contents.get("email_body")
+        # )
+        background_tasks.add_task(
+            self.email_service.send_email,
             user_email=db_interview.user.email,
             subject=report_contents.get("email_subject"),
             body=report_contents.get("email_body")
         )
-
         report = self.report_service.create_report(
             interview = db_interview,
             report_content = report_content,
             file_path=report_path,
-            sent_to_email=sent_to_email,
-            strengths=report_contents.get("strengths", []),
-            areas_for_improvement=report_contents.get("areas_for_improvement", [])
+            sent_to_email=True,
+            strengths=report_contents.get("strengths", []) or [],
+            areas_for_improvement=report_contents.get("areas_for_improvement", []) or []
         )
         if not report:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to generate the report.")

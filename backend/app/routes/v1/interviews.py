@@ -45,9 +45,9 @@ async def submit_answer(
     interview_service: InterviewService = Depends()
 ):
     """
-    Submits a user's answer for a specific question to be evaluated and saved.
+    Submits a user's answer for a specific question.
     """
-    return await interview_service.submit_and_evaluate_answer(
+    return await interview_service.submit_answer(
         interview_id=interview_id,
         answer_data=answer_data
     )

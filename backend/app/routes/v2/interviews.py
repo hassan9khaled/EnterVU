@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, BackgroundTasks
 from typing import Union, List
 
 from app.schemes.interview_schemes import InterviewCreate, InterviewOut
@@ -64,9 +64,9 @@ async def submit_answer(
     interview_service: InterviewService = Depends()
 ):
     """
-    Submits a user's answer for a specific question to be evaluated and saved.
+    Submits a user's answer for a specific question.
     """
-    return await interview_service.submit_and_evaluate_answer(
+    return await interview_service.submit_answer(
         interview_id=interview_id,
         answer_data=answer_data
     )
@@ -86,9 +86,13 @@ async def delete_interview(
 @interviews_router.post("/{interview_id}/finish", response_model=InterviewOut)
 async def finish_interview(
     interview_id: int,
+    background_tasks: BackgroundTasks,
     interview_service: InterviewService = Depends()
 ):
     """
     Finalizes the interview, calculates the score, and generates the final report.
     """
-    return await interview_service.finish_and_generate_report(interview_id=interview_id)
+    return await interview_service.finish_and_generate_report(
+        interview_id=interview_id,
+        background_tasks=background_tasks
+    )

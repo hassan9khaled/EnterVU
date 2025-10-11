@@ -1,4 +1,4 @@
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
 from .report_schemas import ReportOut

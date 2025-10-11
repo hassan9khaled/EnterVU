@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field  
+from typing import List
 
 class AnswerCreate(BaseModel):
     question_id: int
@@ -18,6 +19,8 @@ class AnswerEvaluation(BaseModel):
     """
     Defines the structured output for the AI agent that evaluates a single answer.
     """
+    question_id: int
+
     score: float = Field(
         ...,
         ge=0,
@@ -28,3 +31,7 @@ class AnswerEvaluation(BaseModel):
         ...,
         description="Concise, constructive, and encouraging feedback for the user, explaining the score."
     )
+
+class AnswerEvaluationAgent(BaseModel):
+    
+    answers: List[AnswerEvaluation]

@@ -4,4 +4,4 @@ class QuestionType(str, Enum):
 
     SITUATIONAL = "situational"
     TECHNICAL = "technical"
-    BEHAVIOURAL = "behavioural"
+    BEHAVIORAL = "behavioral"

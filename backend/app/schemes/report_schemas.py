@@ -37,8 +37,8 @@ class ReportOut(BaseModel):
     
     id: int
     content: str
-    strengths: List[str]
-    areas_for_improvement: List[str]
+    strengths: List[str] = [] 
+    areas_for_improvement: List[str] = [] 
 
     class Config:
         from_attributes = True
