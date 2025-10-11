@@ -1,0 +1,594 @@
+{
+	"info": {
+		"_postman_id": "a8f2c1b1-7c5b-4e1e-9a0e-c4a3b1d2e0f1",
+		"name": "AI Interview System API v2",
+		"description": "The complete Postman collection for the v2 API of the AI Interview System. This version includes a full user authentication flow, CV management, and the complete interview lifecycle from start to finish.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "API Info",
+			"description": "General endpoints for checking the API's status and version.",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Performs a simple health check on the API to confirm it is running and accessible."
+					},
+					"response": []
+				},
+				{
+					"name": "Get API Information",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Returns the application's name and current version from the environment settings."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Authentication & Users",
+			"description": "Endpoints for user registration, login, and management.",
+			"item": [
+				{
+					"name": "Register New User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// This script automatically captures the new user's ID",
+									"// and saves it to the 'user_id' collection variable for use in other requests.",
+									"pm.test(\"User created successfully and user_id is set\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData.email).to.eql(pm.request.body.json.email);",
+									"    pm.collectionVariables.set(\"user_id\", jsonData.id);",
+									"    console.log(\"Set collection variable 'user_id' to: \" + jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"testuser@example.com\",\n    \"name\": \"Test User\",\n    \"password\": \"strongpassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								""
+							]
+						},
+						"description": "Registers a new user in the system.\n\n- **email**: Must be a unique email address.\n- **name**: The full name of the user.\n- **password**: The user's password.\n\nIf a user with the provided email already exists, a `409 Conflict` error will be returned."
+					},
+					"response": []
+				},
+				{
+					"name": "User Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// This script automatically captures the logged-in user's ID",
+									"// and saves it to the 'user_id' collection variable for use in other requests.",
+									"pm.test(\"Login successful and user_id is set\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.collectionVariables.set(\"user_id\", jsonData.id);",
+									"    console.log(\"Set collection variable 'user_id' to: \" + jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"strongpassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						},
+						"description": "Logs in a user with their email and password."
+					},
+					"response": []
+				},
+				{
+					"name": "Get a Specific User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Retrieves detailed information for a single user by their unique ID.\n\nIf a user with the specified ID is not found, a `404 Not Found` error is returned."
+					},
+					"response": []
+				},
+				{
+					"name": "List All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/?skip=0&limit=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								""
+							],
+							"query": [
+								{
+									"key": "skip",
+									"value": "0"
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								}
+							]
+						},
+						"description": "Retrieves a paginated list of all users registered in the system."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test User Updated\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Updates a user's details. Only the fields provided in the request body will be modified.\n\n- **email**: If provided, must be a unique email address.\n- **name**: If provided, updates the user's name.\n\nIf a user with the specified ID is not found, a `404 Not Found` error is returned.\nIf the new email already belongs to another user, a `409 Conflict` error is returned."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Deletes a user from the system by their unique ID. This will also delete all associated CVs, interviews, and reports due to cascading deletes in the database.\n\nIf a user with the specified ID is not found, a `404 Not Found` error is returned."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CV Management",
+			"description": "Endpoints for uploading and managing user CVs.",
+			"item": [
+				{
+					"name": "Upload New CV",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// This script automatically captures the new CV's ID",
+									"// and saves it to the 'cv_id' collection variable.",
+									"pm.test(\"CV uploaded successfully and cv_id is set\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.collectionVariables.set(\"cv_id\", jsonData.id);",
+									"    console.log(\"Set collection variable 'cv_id' to: \" + jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "user_id",
+									"value": "{{user_id}}",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/cvs/upload",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cvs",
+								"upload"
+							]
+						},
+						"description": "Handles the upload of a CV file for a specific user.\n\nThis endpoint expects `multipart/form-data`.\n\n- **user_id**: The ID of the user uploading the CV.\n- **file**: The PDF file of the CV."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All CVs for User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/cvs/user?user_id={{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cvs",
+								"user"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "{{user_id}}"
+								}
+							]
+						},
+						"description": "Retrieves a list of all CVs that have been uploaded by a specific user."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a CV",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/cvs/?user_id={{user_id}}&cv_id={{cv_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cvs",
+								""
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "{{user_id}}"
+								},
+								{
+									"key": "cv_id",
+									"value": "{{cv_id}}"
+								}
+							]
+						},
+						"description": "Deletes a specific CV by its ID and the owner's user ID. This will also delete any interviews associated with this CV."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Interview Lifecycle",
+			"description": "The complete, step-by-step flow for conducting an AI-powered interview.",
+			"item": [
+				{
+					"name": "1. Start Interview",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// This script automatically captures the new interview's ID",
+									"// and saves it to the 'interview_id' collection variable.",
+									"pm.test(\"Interview started successfully and interview_id is set\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.collectionVariables.set(\"interview_id\", jsonData.id);",
+									"    console.log(\"Set collection variable 'interview_id' to: \" + jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{user_id}},\n    \"cv_id\": {{cv_id}},\n    \"job_title\": \"Senior Python Developer\",\n    \"job_description\": \"We are looking for a Senior Python Developer with experience in FastAPI, SQLAlchemy, and building scalable microservices. Experience with AI/ML integrations is a plus.\",\n    \"skills_to_foucs\": [\n        \"python\",\n        \"fastapi\",\n        \"api design\",\n        \"sql\"\n    ],\n    \"mode\": \"easy\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/interviews/start",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interviews",
+								"start"
+							]
+						},
+						"description": "Starts a new interview session. This is the first step in the interview process.\n\n- Validates the user and CV.\n- Calls the AI agent to generate a set of tailored interview questions based on the CV and job details.\n- Creates the interview record and all its associated question records in the database.\n\nReturns the complete interview object, including the list of questions to be asked."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Get Next Question",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// This script automatically captures the question ID from the response",
+									"// and saves it to the 'question_id' collection variable for the next step.",
+									"pm.test(\"Next question retrieved and question_id is set\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.id) {",
+									"        pm.collectionVariables.set(\"question_id\", jsonData.id);",
+									"        console.log(\"Set collection variable 'question_id' to: \" + jsonData.id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/interviews/{{interview_id}}/next-question",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interviews",
+								"{{interview_id}}",
+								"next-question"
+							]
+						},
+						"description": "Retrieves the next unanswered question for an ongoing interview. The frontend should call this endpoint repeatedly until it receives a message indicating all questions have been answered."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Submit Answer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question_id\": {{question_id}},\n    \"user_answer\": \"To optimize a slow algorithm in Python, I would first profile the code using a tool like cProfile to identify the bottlenecks. Then, I would look for opportunities to use more efficient data structures, such as using a set for fast lookups instead of a list. I would also check if any loops can be vectorized using libraries like NumPy for numerical operations.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/interviews/{{interview_id}}/answer",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interviews",
+								"{{interview_id}}",
+								"answer"
+							]
+						},
+						"description": "Submits a user's answer for a specific question to be evaluated by the AI and saved.\n\n**Request Body:**\n- `question_id` (integer, required): The ID of the question being answered.\n- `user_answer` (string, required): The user's text answer.\n\nReturns the evaluated answer object, including the score and feedback from the AI."
+					},
+					"response": []
+				},
+				{
+					"name": "4. Finish Interview",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/interviews/{{interview_id}}/finish",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interviews",
+								"{{interview_id}}",
+								"finish"
+							]
+						},
+						"description": "Finalizes the interview after all questions have been answered. \n\nThis endpoint triggers the final, comprehensive evaluation:\n- Calculates the final score.\n- Calls the 'Hiring Manager' AI agent to make a final decision and generate a detailed report summary.\n- Saves the report to the database.\n- (Future) Sends the report to the user's email.\n\nReturns the complete, updated interview object, now including the final score, decision, and the full report."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Interview History & Reports",
+			"description": "Endpoints for retrieving past interview data and reports.",
+			"item": [
+				{
+					"name": "Get All Interviews for User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/interviews/?user_id={{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interviews",
+								""
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "{{user_id}}"
+								}
+							]
+						},
+						"description": "Retrieves a list of all past and in-progress interviews for the current user."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Specific Interview (Report)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/interviews/{{interview_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interviews",
+								"{{interview_id}}"
+							]
+						},
+						"description": "Fetches a specific interview by its ID, including all related data like the user, CV, questions, answers, and the final report. This is the main endpoint for viewing a completed interview report."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Interview",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/interviews/{{interview_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"interviews",
+								"{{interview_id}}"
+							]
+						},
+						"description": "Deletes an entire interview session, including all its associated questions, answers, and report."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000/api/v2",
+			"description": "The base URL of the locally running FastAPI application, pointing to the V2 API."
+		},
+		{
+			"key": "user_id",
+			"value": "1",
+			"description": "Automatically set after running 'Register New User' or 'User Login'."
+		},
+		{
+			"key": "cv_id",
+			"value": "1",
+			"description": "Automatically set after running 'Upload New CV'."
+		},
+		{
+			"key": "interview_id",
+			"value": "",
+			"description": "Automatically set after running '1. Start Interview'."
+		},
+		{
+			"key": "question_id",
+			"value": "",
+			"description": "Automatically set after running '2. Get Next Question'."
+		}
+	]
+}
