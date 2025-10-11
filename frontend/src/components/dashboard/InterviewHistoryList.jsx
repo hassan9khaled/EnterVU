@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Briefcase, ChevronRight, Clock, CheckCircle, Play, FileText } from 'lucide-react';
+import { Briefcase, Clock, CheckCircle, Play, FileText } from 'lucide-react';
 import Card from '../common/Card';
 
 const InterviewHistoryList = ({ interviews }) => {
@@ -28,11 +28,11 @@ const InterviewHistoryList = ({ interviews }) => {
     const getStatusStyles = (status) => {
         switch (status?.toUpperCase()) {
             case 'IN_PROGRESS':
-                return 'bg-orange-100 text-orange-800 border border-orange-200';
+                return 'bg-orange-100 text-orange-800';
             case 'COMPLETED':
-                return 'bg-green-100 text-green-800 border border-green-200';
+                return 'bg-green-100 text-green-800';
             default:
-                return 'bg-gray-100 text-gray-800 border border-gray-200';
+                return 'bg-gray-100 text-gray-800';
         }
     };
 
@@ -58,14 +58,6 @@ const InterviewHistoryList = ({ interviews }) => {
         return `${Math.round(score)}%`;
     };
 
-    const formatFileName = (fileName) => {
-        if (!fileName) return 'No CV';
-        if (fileName.length > 20) {
-            return fileName.substring(0, 20) + '...';
-        }
-        return fileName;
-    };
-
     return (
         <Card className="p-6">
             <div className="flex items-center justify-between mb-6">
@@ -79,12 +71,11 @@ const InterviewHistoryList = ({ interviews }) => {
             </div>
             
             <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="w-full">
                     <thead className="bg-gray-50">
                         <tr>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CV Used</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Title</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
@@ -95,24 +86,17 @@ const InterviewHistoryList = ({ interviews }) => {
                             const buttonConfig = getButtonConfig(interview.status);
                             return (
                                 <tr key={interview.id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-4 py-4 whitespace-nowrap">
+                                    <td className="px-4 py-4">
                                         <div className="text-sm font-medium text-gray-900">
+                                            {interview.job_title || 'General Interview'}
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-4 whitespace-nowrap">
+                                        <div className="text-sm text-gray-900">
                                             {new Date(interview.created_at).toLocaleDateString()}
                                         </div>
-                                        <div className="text-xs text-gray-500">
-                                            {new Date(interview.created_at).toLocaleTimeString([], { 
-                                                hour: '2-digit', 
-                                                minute: '2-digit' 
-                                            })}
-                                        </div>
                                     </td>
-                                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {formatFileName(interview.cvs?.file_name)}
-                                    </td>
-                                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {interview.job_title || 'General Interview'}
-                                    </td>
-                                    <td className="px-4 py-4 whitespace-nowrap">
+                                    <td className="px-4 py-4">
                                         <span className={`text-sm font-bold ${
                                             interview.final_score >= 80 ? 'text-green-600' :
                                             interview.final_score >= 60 ? 'text-orange-600' :
@@ -121,18 +105,18 @@ const InterviewHistoryList = ({ interviews }) => {
                                             {formatScore(interview.final_score)}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-4 whitespace-nowrap">
+                                    <td className="px-4 py-4">
                                         <div className="flex items-center gap-2">
                                             {getStatusIcon(interview.status)}
-                                            <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusStyles(interview.status)}`}>
-                                                {interview.status?.toUpperCase() || 'UNKNOWN'}
+                                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusStyles(interview.status)}`}>
+                                                {interview.status?.replace('_', ' ') || 'Unknown'}
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-4 whitespace-nowrap text-right">
+                                    <td className="px-4 py-4 text-right">
                                         <button
                                             onClick={() => handleViewInterview(interview)}
-                                            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${buttonConfig.className}`}
+                                            className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${buttonConfig.className}`}
                                         >
                                             {buttonConfig.icon}
                                             {buttonConfig.text}

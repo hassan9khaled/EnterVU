@@ -1,7 +1,7 @@
 // components/layout/Header.jsx
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
+import { LogOut, BookOpen } from 'lucide-react';
 import { useAuth } from '~/contexts/AuthContext';
 import EnterVU from '~/assets/EnterVU_logo.png';
 
@@ -29,6 +29,15 @@ const Header = () => {
 
           {user ? (
             <div className="flex items-center space-x-4">
+              {/* Docs Button */}
+              <Link
+                to="/docs"
+                className="flex items-center space-x-1 text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors"
+              >
+                <BookOpen className="h-4 w-4" />
+                <span>Docs</span>
+              </Link>
+              
               <div className="text-right">
                 <span className="text-sm font-medium">
                   {user.name || user.email?.split('@')[0] || 'User'}
@@ -44,7 +53,16 @@ const Header = () => {
               </button>
             </div>
           ) : (
-            <div className="flex space-x-4">
+            <div className="flex items-center space-x-4">
+              {/* Docs Button for non-logged in users */}
+              <Link
+                to="/docs"
+                className="flex items-center space-x-1 text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors"
+              >
+                <BookOpen className="h-4 w-4" />
+                <span>Docs</span>
+              </Link>
+              
               <Link
                 to="/login"
                 className="text-sm font-medium text-indigo-600 hover:text-indigo-800"
