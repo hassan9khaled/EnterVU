@@ -6,9 +6,12 @@ import DashboardPage from '~/pages/DashboardPage.jsx';
 import NewInterviewPage from '~/pages/NewInterviewPage.jsx';
 import InterviewReportPage from '~/pages/InterviewReportPage.jsx';
 import LiveInterviewPage from '~/pages/LiveInterviewPage.jsx';
+import LiveInterviewPageVoice from '~/pages/LiveInterviewPageVoice.jsx';
 import NotFoundPage from '~/pages/NotFoundPage.jsx';
 import LoginPage from '~/pages/LoginPage.jsx';
 import RegisterPage from '~/pages/RegisterPage.jsx';
+import ApiDocsPage from '~/pages/ApiDocsPage.jsx';
+
 const AppContent = () => {
   const { user, loading } = useAuth();
 
@@ -26,7 +29,9 @@ const AppContent = () => {
           <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/" />} />
           <Route path="/new-interview" element={user ? <NewInterviewPage /> : <Navigate to="/login" />} />
           <Route path="/interview/:id" element={user ? <LiveInterviewPage /> : <Navigate to="/login" />} />
+          <Route path="/interview/live/:id" element={<LiveInterviewPageVoice />} />
           <Route path="/report/:id" element={user ? <InterviewReportPage /> : <Navigate to="/login" />} />
+          <Route path="/docs" element={<ApiDocsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>

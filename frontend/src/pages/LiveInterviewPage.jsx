@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Send, Loader2, CheckCircle } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Send, Loader2, CheckCircle, Mic } from 'lucide-react'; 
 import { getNextQuestion, submitAnswer, finishInterview } from '~/api/apiClient';
 import Card from '~/components/common/Card';
 
@@ -23,7 +23,7 @@ const LiveInterviewPage = () => {
 
             if (response.data && response.data.question) {
                 setQuestion(response.data.question);
-                setQuestionCount(prev => ({ 
+                setQuestionCount(prev => ({
                     current: response.data.question.order,
                     total: response.data.total_questions || prev.total
                 }));
@@ -36,6 +36,7 @@ const LiveInterviewPage = () => {
             }
         } catch (err) {
             setError('Failed to fetch the next question. Please try again.');
+            setTimeout(() => navigate(`/report/${interviewId}`), 1000);
             console.error(err);
         } finally {
             setIsLoading(false);
@@ -71,7 +72,7 @@ const LiveInterviewPage = () => {
             setIsSubmitting(false);
         }
     };
-    
+
     if (isLoading && !question) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -104,19 +105,24 @@ const LiveInterviewPage = () => {
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="max-w-3xl mx-auto px-4">
-
-                {/* Progress Indicator */}
+                {/* Header Section with Progress and Switch Button */}
                 <div className="mb-8">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">
-                            Question {questionCount.current} of {questionCount.total}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                            {Math.round((questionCount.current / questionCount.total) * 100)}%
-                        </span>
+                    <div className="flex items-start justify-between mb-2">
+                        <div>
+                            <span className="text-sm font-medium text-gray-700">
+                                Question {questionCount.current} of {questionCount.total}
+                            </span>
+                        </div>
+                        <button
+                            onClick={() => navigate(`/interview/live/${interviewId}`)}
+                            className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                        >
+                            <Mic className="h-4 w-4" />
+                            <span>Switch to Voice Interview</span>
+                        </button>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                             className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${(questionCount.current / questionCount.total) * 100}%` }}
                         ></div>
@@ -131,7 +137,6 @@ const LiveInterviewPage = () => {
                                 Question {questionCount.current}
                             </span>
                         </div>
-
                         <div className="bg-white p-6 rounded-lg border border-gray-200 min-h-[120px] flex items-center">
                             {isLoading ? (
                                 <div className="text-center w-full">
@@ -152,7 +157,6 @@ const LiveInterviewPage = () => {
                             <label className="block text-sm font-semibold text-gray-700 mb-3">
                                 Your Answer
                             </label>
-                            
                             <div className="relative">
                                 <textarea
                                     value={userAnswer}
@@ -163,7 +167,6 @@ const LiveInterviewPage = () => {
                                     disabled={isSubmitting || isLoading}
                                 />
                             </div>
-
                             <div className="flex justify-between items-center mt-2">
                                 <span className="text-sm text-gray-500">
                                     Minimum 50 characters recommended
@@ -174,14 +177,12 @@ const LiveInterviewPage = () => {
                             </div>
                         </div>
 
-                        {/* Error Message */}
                         {error && (
                             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                                 <p className="text-red-700 text-sm font-medium">{error}</p>
                             </div>
                         )}
 
-                        {/* Submit Button */}
                         <div className="flex justify-end">
                             <button
                                 type="submit"

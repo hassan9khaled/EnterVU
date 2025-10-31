@@ -7,6 +7,7 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
 apiClient.interceptors.request.use((config) => {
     const userData = localStorage.getItem('user');
     if (userData) {
@@ -142,7 +143,37 @@ export const registerUser = (name, email, password) => {
 export const loginUser = (email, password) => {
   return apiClient.post('/users/login', { email, password });
 };
+// SSE (Server-Sent Events) endpoints for live audio streaming
+export const sseEndpoints = {
+  events: (userId, interviewId) => 
+    `http://127.0.0.1:8000/api/v2/interviews/events/${userId}/${interviewId}`,
 
+  send: (userId) => 
+    `http://127.0.0.1:8000/api/v2/interviews/send/${userId}`,
+};
+
+// Send message to agent
+export const sendToAgent = async (userId, message) => {
+  try {
+    const fullUrl = sseEndpoints.send(userId);
+    const response = await fetch(fullUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(message),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error sending message to agent:', error);
+    throw error;
+  }
+};
 
 export default apiClient;
 

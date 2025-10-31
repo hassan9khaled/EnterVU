@@ -87,12 +87,12 @@ const NewInterviewPage = () => {
                 mode: difficulty,
             };
 
-            // const interviewResponse = await startInterview(interviewData);
+            const interviewResponse = await startInterview(interviewData);
             
             // Updated navigation logic for live voice interviews
             const destination = interviewMode === 'live' 
-                ? `/interview/live/${1}`  // Redirect to live voice interview page
-                : `/interview/${1}`;      // Regular text interview
+                ? `/interview/live/${interviewResponse.data.id}`  // Redirect to live voice interview page
+                : `/interview/${interviewResponse.data.id}`;      // Regular text interview
 
             navigate(destination, {
                 state: { 
