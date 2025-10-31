@@ -1,8 +1,9 @@
 // components/dashboard/CVList.jsx
 import React, { useState } from 'react';
 import { Upload, FileText, Trash2 } from 'lucide-react';
-import { uploadCv, deleteCv } from '~/api/apiClient';
-import { useAuth } from '~/contexts/AuthContext';
+import { uploadCv, deleteCv } from '~/api/apiClient'; // Use ~ alias
+import { useAuth } from '~/contexts/AuthContext'; // Use ~ alias
+import Card from '~/components/common/Card.jsx'; // Use ~ alias
 
 const CVList = ({ cvs, onCvUpload }) => {
     const [uploading, setUploading] = useState(false);
@@ -62,7 +63,7 @@ const CVList = ({ cvs, onCvUpload }) => {
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">Your CVs</h2>
                 <div className="relative">
@@ -131,10 +132,10 @@ const CVList = ({ cvs, onCvUpload }) => {
             <div className="mt-4 text-xs text-gray-500">
                 <p>• Only PDF files are supported</p>
                 <p>• Maximum file size: 10MB</p>
-                <p>• Maximum Pages: 5</p>
             </div>
-        </div>
+        </Card>
     );
 };
 
 export default CVList;
+

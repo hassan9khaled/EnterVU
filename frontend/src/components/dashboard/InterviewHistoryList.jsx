@@ -1,58 +1,52 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Briefcase, Clock, CheckCircle, Play, FileText } from 'lucide-react';
-import Card from '../common/Card';
+import { Briefcase, Clock, CheckCircle, Play, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import Card from '~/components/common/Card.jsx';
+
+const ITEMS_PER_PAGE = 5; // Set how many interviews to show per page
 
 const InterviewHistoryList = ({ interviews }) => {
     const navigate = useNavigate();
+    const [currentPage, setCurrentPage] = useState(1);
+
+    // --- Pagination Logic ---
+    const totalPages = Math.ceil(interviews.length / ITEMS_PER_PAGE);
+    const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
+    const currentItems = interviews.slice(indexOfFirstItem, indexOfLastItem);
+    
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+    // --- End Pagination Logic ---
 
     const handleViewInterview = (interview) => {
-        if (interview.status === 'in_progress') {
+        if (interview.status.toUpperCase() === 'IN_PROGRESS') {
             navigate(`/interview/${interview.id}`);
         } else {
             navigate(`/report/${interview.id}`);
         }
     };
 
+    // (Helper functions: getStatusIcon, getStatusStyles, getButtonConfig, formatScore remain the same as your file)
     const getStatusIcon = (status) => {
         switch (status?.toUpperCase()) {
-            case 'IN_PROGRESS':
-                return <Clock className="h-4 w-4 text-orange-500" />;
-            case 'COMPLETED':
-                return <CheckCircle className="h-4 w-4 text-green-500" />;
-            default:
-                return <FileText className="h-4 w-4 text-gray-500" />;
+            case 'IN_PROGRESS': return <Clock className="h-4 w-4 text-orange-500" />;
+            case 'COMPLETED': return <CheckCircle className="h-4 w-4 text-green-500" />;
+            default: return <FileText className="h-4 w-4 text-gray-500" />;
         }
     };
-
     const getStatusStyles = (status) => {
         switch (status?.toUpperCase()) {
-            case 'IN_PROGRESS':
-                return 'bg-orange-100 text-orange-800';
-            case 'COMPLETED':
-                return 'bg-green-100 text-green-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
+            case 'IN_PROGRESS': return 'bg-orange-100 text-orange-800';
+            case 'COMPLETED': return 'bg-green-100 text-green-800';
+            default: return 'bg-gray-100 text-gray-800';
         }
     };
-
     const getButtonConfig = (status) => {
         switch (status?.toUpperCase()) {
-            case 'IN_PROGRESS':
-                return {
-                    text: 'Continue',
-                    icon: <Play className="h-4 w-4" />,
-                    className: 'bg-orange-600 hover:bg-orange-700 text-white'
-                };
-            default:
-                return {
-                    text: 'View Report',
-                    icon: <FileText className="h-4 w-4" />,
-                    className: 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                };
+            case 'IN_PROGRESS': return { text: 'Continue', icon: <Play className="h-4 w-4" />, className: 'bg-orange-600 hover:bg-orange-700 text-white' };
+            default: return { text: 'View Report', icon: <FileText className="h-4 w-4" />, className: 'bg-indigo-600 hover:bg-indigo-700 text-white' };
         }
     };
-
     const formatScore = (score) => {
         if (!score && score !== 0) return '-';
         return `${Math.round(score)}%`;
@@ -82,7 +76,7 @@ const InterviewHistoryList = ({ interviews }) => {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {interviews.map(interview => {
+                        {currentItems.map(interview => { // Map over currentItems
                             const buttonConfig = getButtonConfig(interview.status);
                             return (
                                 <tr key={interview.id} className="hover:bg-gray-50 transition-colors">
@@ -136,8 +130,34 @@ const InterviewHistoryList = ({ interviews }) => {
                     </div>
                 )}
             </div>
+
+            {/* --- Pagination Component --- */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between border-t border-gray-200 pt-4 mt-4">
+                    <button
+                        onClick={() => paginate(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                        <ChevronLeft className="h-5 w-5" />
+                        <span className="ml-2">Previous</span>
+                    </button>
+                    <div className="text-sm text-gray-700">
+                        Page <span className="font-medium">{currentPage}</span> of <span className="font-medium">{totalPages}</span>
+                    </div>
+                    <button
+                        onClick={() => paginate(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                        <span className="mr-2">Next</span>
+                        <ChevronRight className="h-5 w-5" />
+                    </button>
+                </div>
+            )}
         </Card>
     );
 };
 
 export default InterviewHistoryList;
+

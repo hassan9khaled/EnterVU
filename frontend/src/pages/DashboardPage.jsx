@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import InterviewHistoryList from '~/components/dashboard/InterviewHistoryList';
+import CVList from '~/components/dashboard/CVList'; // Import the CVList
 import { getInterviews, getCvs } from '~/api/apiClient';
 import { useAuth } from '~/contexts/AuthContext';
 
@@ -10,11 +11,10 @@ const DashboardPage = () => {
     const [cvs, setCvs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
-    
     const { user } = useAuth();
 
-    const fetchData = async () => {
+    // Renamed fetchData to be more specific and wrapped in useCallback
+    const fetchDashboardData = useCallback(async () => {
         if (!user?.id) {
             setLoading(false);
             return;
@@ -38,11 +38,11 @@ const DashboardPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user]); // Dependency is just the user object
 
     useEffect(() => {
-        fetchData();
-    }, [user, refreshTrigger]);
+        fetchDashboardData();
+    }, [fetchDashboardData]); // Effect runs when the memoized function changes
 
     if (loading) {
         return <div className="text-center py-8">Loading your dashboard...</div>;
@@ -75,10 +75,23 @@ const DashboardPage = () => {
                 </Link>
             </div>
 
-            {/* Interview History - Full Width */}
-            <InterviewHistoryList interviews={interviews} />
+            {/* Main Content Area - Refactored into a grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                
+                {/* Primary Column: Interview History */}
+                <div className="lg:col-span-2">
+                    <InterviewHistoryList interviews={interviews} />
+                </div>
+                
+                {/* Secondary Column: CV List */}
+                <div className="lg:col-span-1 space-y-6">
+                    <CVList cvs={cvs} onCvUpload={fetchDashboardData} />
+                </div>
+
+            </div>
         </div>
     );
 };
 
 export default DashboardPage;
+
