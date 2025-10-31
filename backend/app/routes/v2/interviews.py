@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, status, BackgroundTasks
 from typing import Union, List
+
+from fastapi import APIRouter, Depends, status, BackgroundTasks
 
 from app.schemes.interview_schemes import InterviewCreate, InterviewOut
 from app.schemes.questions_schemes import NextQuestionResponse
 from app.schemes.response_schemes import OperationResponse
 from app.schemes.answers_schemes import AnswerOut, AnswerCreate
+
 from app.models.enums.ResponseEnums import OperationStatus
 
 from app.services.interview_service import InterviewService

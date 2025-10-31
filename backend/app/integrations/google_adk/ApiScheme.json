@@ -1,0 +1,553 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "EnterVU",
+    "description": "MVP for AI-powered interview preparation and evaluation",
+    "version": "0.2"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:5000"
+    }
+  ],
+  "paths": {
+    "/api/v2/interviews/{interview_id}/next-question": {
+      "get": {
+        "tags": [
+          "api_v2",
+          "Interviews"
+        ],
+        "summary": "Get Next Question",
+        "description": "Retrieves the next unanswered question for an ongoing interview.",
+        "operationId": "get_next_question_api_v2_interviews__interview_id__next_question_get",
+        "parameters": [
+          {
+            "name": "interview_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Interview Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/NextQuestionResponse"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  ],
+                  "title": "Response Get Next Question Api V2 Interviews  Interview Id  Next Question Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/interviews/{interview_id}/answer": {
+      "post": {
+        "tags": [
+          "api_v2",
+          "Interviews"
+        ],
+        "summary": "Submit Answer",
+        "description": "Submits a user's answer for a specific question.",
+        "operationId": "submit_answer_api_v2_interviews__interview_id__answer_post",
+        "parameters": [
+          {
+            "name": "interview_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Interview Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnswerCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnswerOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/interviews/{interview_id}/finish": {
+      "post": {
+        "tags": [
+          "api_v2",
+          "Interviews"
+        ],
+        "summary": "Finish Interview",
+        "description": "Finalizes the interview, calculates the score, and generates the final report.",
+        "operationId": "finish_interview_api_v2_interviews__interview_id__finish_post",
+        "parameters": [
+          {
+            "name": "interview_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Interview Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterviewOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnswerCreate": {
+        "properties": {
+          "question_id": {
+            "type": "integer",
+            "title": "Question Id"
+          },
+          "user_answer": {
+            "type": "string",
+            "title": "User Answer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question_id",
+          "user_answer"
+        ],
+        "title": "AnswerCreate"
+      },
+      "AnswerOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user_answer": {
+            "type": "string",
+            "title": "User Answer"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "feedback": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_answer"
+        ],
+        "title": "AnswerOut"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "InterviewOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserOut"
+          },
+          "cvs": {
+            "$ref": "#/components/schemas/CvOut"
+          },
+          "job_title": {
+            "type": "string",
+            "title": "Job Title"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/QuestionOut"
+            },
+            "type": "array",
+            "title": "Questions",
+            "default": []
+          },
+          "final_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Score"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision"
+          },
+          "report": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReportOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user",
+          "cvs",
+          "job_title",
+          "status",
+          "mode",
+          "created_at"
+        ],
+        "title": "InterviewOut"
+      },
+      "NextQuestionResponse": {
+        "properties": {
+          "question": {
+            "$ref": "#/components/schemas/QuestionOut"
+          },
+          "total_questions": {
+            "type": "integer",
+            "title": "Total Questions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question",
+          "total_questions"
+        ],
+        "title": "NextQuestionResponse"
+      },
+      "QuestionOut": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "max_score": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 0.0,
+            "title": "Max Score",
+            "description": "Score must be between 0 and 10"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "BEHAVIORAL",
+              "TECHNICAL",
+              "SITUATIONAL"
+            ],
+            "title": "Type"
+          },
+          "topics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Topics",
+            "description": "All topics must be in lower case"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "answer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnswerOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "order": {
+            "type": "integer",
+            "title": "Order"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content",
+          "max_score",
+          "type",
+          "topics",
+          "id",
+          "order"
+        ],
+        "title": "QuestionOut"
+      },
+      "ReportOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "strengths": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Strengths",
+            "default": []
+          },
+          "areas_for_improvement": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Areas For Improvement",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "content"
+        ],
+        "title": "ReportOut"
+      },
+      "UserOut": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Password"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "id"
+        ],
+        "title": "UserOut"
+      },
+      "CvOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "raw_text": {
+            "type": "string",
+            "title": "Raw Text"
+          },
+          "file_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Path"
+          },
+          "file_name": {
+            "type": "string",
+            "title": "File Name"
+          },
+          "uploaded_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Uploaded At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "raw_text",
+          "file_name",
+          "uploaded_at"
+        ],
+        "title": "CvOut"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

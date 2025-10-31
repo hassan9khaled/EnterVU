@@ -1,5 +1,6 @@
 import json
 import re
+
 from typing import List, Union
 from fastapi import Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session, joinedload
@@ -61,7 +62,7 @@ class InterviewService:
             "job_description": interview_data.job_description,
             "n_questions": interview_data.mode.get_question_count(),
             "parsed_cv_json": cv.raw_text,
-            "skills_to_focus": interview_data.skills_to_foucs
+            "skills_to_foucs": interview_data.skills_to_foucs
         }
 
         question_prompt = f"""
@@ -69,7 +70,7 @@ class InterviewService:
 
         - Job Title: {question_query['job_title']}
         - Job Description: "{question_query['job_description']}"
-        - Skills to Focus On: {question_query['skills_to_focus']}
+        - Skills to Focus On: {question_query['skills_to_foucs']}
         - Candidate CV (JSON): {question_query['parsed_cv_json']}
         - Number of Questions to Generate: {question_query['n_questions']}
         """
@@ -131,20 +132,6 @@ class InterviewService:
         if db_question.answer is not None:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This question has already been answered.")
         
-        # eval_prompt = f"""
-        #         **Context:**
-        #         - **`question_text`**: "{db_question.content}"
-        #         - **`answer_text`**: "{answer_data.user_answer}"
-        #     """
-        
-        # evaluation = await run_agent(
-        #     agent=answer_evaluation_agent,
-        #     query=eval_prompt,
-        #     user_id=db_interview.user_id
-        # )
-
-        # answer= json.loads(evaluation)
-
         db_answer = answer_service.create_answer(
             db=self.db,
             question_id=answer_data.question_id,
@@ -158,7 +145,7 @@ class InterviewService:
 
         return db_answer
     
-    async def _evaluate_answers(self, user_id: int, questions: List[QuestionOut], db_answers: List[Answer]):
+    async def _evaluate_answers(self, user_id: int, db_answers: List[Answer]):
         """
         Prepares the context and calls the AI agent to evaluate all answers in a single batch.
         Updates the answer records in the database safely using a dictionary lookup.
@@ -212,15 +199,8 @@ class InterviewService:
         if len(db_answers) != len(db_interview.questions):
              raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not all questions have been answered yet!")
         
-        questions = []
-
-        for question in db_interview.questions:
-            q = QuestionOut.model_validate(question)
-            questions.append(q)
-
         _ = await self._evaluate_answers(
             user_id=db_interview.user_id,
-            questions=questions,
             db_answers=db_answers
         )
         
@@ -257,17 +237,13 @@ class InterviewService:
 
         self._update_interview_as_completed(db_interview, average_score, report_contents.get("final_decision"))
 
-        # sent_to_email = self.email_service.send_email(
-        #     user_email=db_interview.user.email,
-        #     subject=report_contents.get("email_subject"),
-        #     body=report_contents.get("email_body")
-        # )
         background_tasks.add_task(
             self.email_service.send_email,
             user_email=db_interview.user.email,
             subject=report_contents.get("email_subject"),
             body=report_contents.get("email_body")
         )
+        
         report = self.report_service.create_report(
             interview = db_interview,
             report_content = report_content,
@@ -296,6 +272,7 @@ class InterviewService:
         if not interview:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Interview Not Found")
         return interview
+    
     def get_all_interviews_for_user(self, user_id: int, skip: int = 0, limit: int = 100):
         return self.db.query(Interview).filter(Interview.user_id == user_id).offset(skip).limit(limit).all()
     
@@ -405,12 +382,34 @@ class InterviewService:
         interview.decision = decision
         self.db.add(interview)
 
-    def _calculate_final_score(self, answers: list) -> int:
-        """Calculates the final score and determines the outcome."""
+    def _calculate_final_score(self, answers: list) -> float:
+        """Calculates final score out of 10 based on weighted performance."""
         if not answers:
-            return 0
+            return 0.0
             
-        total_score = sum(ans.score for ans in answers if ans.score is not None)
-        avg_score = total_score / len(answers)
+        total_earned = 0.0
+        total_possible = 0.0
+        
+        for ans in answers:
+            # Skip answers without scores
+            if ans.score is None:
+                continue
+                
+            # Get the max_score from the associated question
+            if ans.question and ans.question.max_score is not None:
+                question_max_score = ans.question.max_score
+            else:
+                # Fallback to default max_score if not specified
+                question_max_score = 10.0
+                
+            total_earned += ans.score
+            total_possible += question_max_score
+        
+        if total_possible == 0:
+            return 0.0
             
-        return avg_score
+        # Calculate percentage and scale to 0-10
+        percentage = (total_earned / total_possible) * 100
+        final_score = (percentage / 10)
+        
+        return round(final_score, 2)

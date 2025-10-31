@@ -3,12 +3,15 @@ import uuid
 from google.adk.agents import Agent
 from google.adk.sessions import InMemorySessionService
 from google.adk.runners import Runner
+
 from google.genai import types
 
 from dotenv import load_dotenv
 load_dotenv()
 
+
 _session_service = InMemorySessionService()
+APP_NAME = "ai_interview_app"
 
 # TODO: Add a session states to each agent and make them run all in the same session
 async def run_agent(agent: Agent, query: str, user_id: int) -> str:
@@ -17,7 +20,7 @@ async def run_agent(agent: Agent, query: str, user_id: int) -> str:
 
     Handles session creation and the async iteration loop.
     """
-    APP_NAME = "ai_interview_app"
+    
     session_id = str(uuid.uuid4()) # Create a new session for each distinct task
     user_id = str(user_id)
     # The runner is created on-the-fly for the specific agent

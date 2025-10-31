@@ -22,12 +22,6 @@ import logging
 
 logger = logging.getLogger('uvicorn.error')
 
-origins = [
-    "http://localhost",
-    "http://localhost:8080",
-    "http://localhost:5173",
-]
-
 app_name = get_settings().APP_NAME
 app_version = get_settings().APP_VERSION
 
@@ -50,13 +44,17 @@ app = FastAPI(
     version=app_version,
     lifespan=lifespan
 )
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins, # Allows specific origins
-    allow_credentials=True, # Allows cookies to be included in cross-origin requests
-    allow_methods=["*"],    # Allows all methods (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],    # Allows all headers in the request
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """
