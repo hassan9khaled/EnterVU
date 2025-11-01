@@ -7,6 +7,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: entervu-api
+    user: "${UID}:${GID}"
     ports:
       - "5000:5000" # Exposes the main API to your host machine
     volumes:
@@ -30,6 +31,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile # Re-uses the same backend image
     container_name: entervu-live
+    user: "${UID}:${GID}"
     ports:
       - "8000:8000" # Exposes the live agent API to your host machine
     working_dir: /code/app/integrations/google_adk
