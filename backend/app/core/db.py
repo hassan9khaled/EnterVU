@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 
 
-DATABASE_URL = "sqlite+pysqlite:///./ai_interview.db"
+DATABASE_URL = "sqlite+pysqlite:////data/ai_interview.db"
 
 engine = create_engine(
     DATABASE_URL, 

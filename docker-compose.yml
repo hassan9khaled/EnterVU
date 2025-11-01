@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # Service 1: The main FastAPI REST API
+  backend-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: entervu-api
+    ports:
+      - "5000:5000" # Exposes the main API to your host machine
+    volumes:
+      # Mount persistent data from your host into the container
+      # This ensures your DB, CVs, reports, and auth token persist
+      - ./backend/app/assets/cvs:/code/app/assets/cvs
+      - ./backend/app/assets/reports:/code/app/assets/reports
+      - ./backend/app/assets/creds:/code/app/assets/creds
+      - ./backend/data:/data
+    env_file:
+      - ./backend/app/.env
+      - ./backend/app/integrations/google_adk/.env
+    environment:
+      - PYTHONPATH=/code
+    # This command starts the main API server
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]
+
+  # Service 2: The FastAPI Live Agent (SSE/Audio)
+  backend-live:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile # Re-uses the same backend image
+    container_name: entervu-live
+    ports:
+      - "8000:8000" # Exposes the live agent API to your host machine
+    working_dir: /code/app/integrations/google_adk
+    env_file:
+      - ./backend/app/integrations/google_adk/.env
+    environment:
+      - PYTHONPATH=/code
+    # This command starts the live agent server from its directory
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  # Service 3: The React Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    container_name: entervu-frontend
+    ports:
+      - "5173:80" # Maps host port 5173 to Nginx's port 80
+    depends_on:
+      - backend-api
+      - backend-live

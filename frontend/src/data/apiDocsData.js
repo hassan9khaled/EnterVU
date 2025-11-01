@@ -1,4 +1,4 @@
-import postmanCollection from '../../../backend/app/assets/EnterVU_API_V2.json';
+import postmanCollection from './EnterVU_API_V2.json';
 
 // This function processes the raw Postman collection into a simpler format for our UI.
 function simplifyCollection(collection) {

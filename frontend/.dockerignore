@@ -1,0 +1,15 @@
+# Dependency directories
+node_modules/
+
+# Build output
+dist/
+.vite/
+
+# Logs
+logs
+*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
